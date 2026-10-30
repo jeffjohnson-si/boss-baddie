@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>BOSS BADDIE — Mobile Homepage Mockup</title>
+<link rel="stylesheet" href="mockup.css">
+<style>
+  /* Mobile-only overrides. In the real site these ARE the defaults and the
+     desktop rules sit behind breakpoints — the build is mobile-first. Here they
+     are scoped to .phone so the mockup renders at phone width on a desktop
+     monitor.
+
+     Note the shell is full-bleed on a phone: no pink margin, because screen
+     space is too precious to spend on a frame. */
+  .phone .h1 { font-size: 44px; }
+  .phone .lede { font-size: 17px; max-width: none; }
+  .phone .hero { padding: 24px 0 40px; }
+  .phone .hero__grid { grid-template-columns: 1fr; gap: 28px; }
+  .phone .hero__lockup { min-height: 0; text-align: center; }
+  .phone .hero__lockup .logo-big { position: static; transform: none; height: 120px; margin: 0 auto 24px; }
+  .phone .hero__portrait { margin: 0 auto; width: 260px; }
+  .phone .segment { flex-direction: column; border-radius: 24px; max-width: none; }
+  .phone .segment > * { min-height: 56px; }          /* large thumb targets */
+  .phone .segment > * + * { border-left: 0; border-top: 1px solid rgba(248,248,248,.15); }
+  .phone .container { padding: 0 20px; }
+  .phone .pillars { grid-template-columns: 1fr; gap: 12px; }
+  .phone .showcase { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .phone .pillar p { font-size: 14px; }               /* never below 14px */
+  .phone .footer__strip { flex-direction: column; align-items: flex-start; gap: 4px; }
+</style>
+<!--
+  MOCKUP 2 of 3 — MOBILE HOMEPAGE
+  ===============================
+  390px logical width, shown inside a bezel for presentation only.
+
+  Mobile decisions:
+    * nav collapses to a hamburger; the open panel is shown below the bar so
+      both states are visible in one image
+    * hero stacks VERTICALLY — logo lockup, then the reserved portrait, then
+      the headline and CTA, matching DOM order so no CSS reordering is needed
+    * the segmented CTA pill splits into two stacked full-width rows
+    * pillars become a single column, the showcase row becomes 2 columns
+    * every tappable row is at least 44px, buttons 56px
+    * body copy never drops below 14px — no cramped small text
+    * condensed footer strip
+
+  IMAGE RULE: the hero portrait and the showcase cards are dashed placeholders
+  for files Patricia uploads. No illustrated women are drawn here.
+-->
+</head>
+<body>
+
+<p class="mockup-caption"><b>Mockup 2 / 3</b> &nbsp;·&nbsp; Mobile homepage &nbsp;·&nbsp; 390px reference</p>
+
+<div class="phone-stage">
+<div class="phone">
+  <div class="phone__notch" aria-hidden="true"><span></span></div>
+  <div class="phone__screen">
+
+    <!-- ========================== HEADER ========================== -->
+    <header class="header">
+      <div class="container header__bar">
+        <a class="header__logo" href="#" aria-label="BOSS BADDIE home">
+          <img src="../public/logo.png" alt="BOSS BADDIE" style="height:46px">
+        </a>
+        <div class="header__actions">
+          <a class="bag" href="#bag" aria-label="Bag, 2 items"><span class="bag__count">2</span></a>
+          <!-- static in the mockup; the real Header.js toggles this panel -->
+          <button class="burger" type="button" aria-expanded="true" aria-label="Close menu">
+            <span></span><span></span><span></span>
+          </button>
+        </div>
+      </div>
+
+      <!-- expanded state shown so both are documented in one view -->
+      <nav class="menu-panel container" aria-label="Main">
+        <a href="#" aria-current="page">Home</a>
+        <a href="#about">About Us</a>
+        <a href="shop-page.html">Shop</a>
+        <a href="#community">Community</a>
+        <a href="#contact" style="border-bottom:0">Contact</a>
+        <a class="btn btn--solid btn--block" href="shop-page.html" style="margin-top:18px;border-bottom:0">Shop Essentials</a>
+        <a class="btn btn--outline btn--block" href="#about" style="margin-top:10px;border-bottom:0">Discover Our Story</a>
+        <a class="pill" href="#contact" style="margin:10px 0 6px;width:100%;justify-content:center;border-bottom:1px solid rgba(248,248,248,.25)">Book a Chat</a>
+      </nav>
+    </header>
+
+    <!-- =========================== HERO =========================== -->
+    <section class="hero">
+      <div class="sparkles" aria-hidden="true">
+        <svg style="left:8%;top:10%"  width="14" height="14" viewBox="-16 -16 32 32"><path d="M0-15 3.2-3.2 15 0 3.2 3.2 0 15-3.2 3.2-15 0-3.2-3.2Z" fill="#e3b873"/></svg>
+        <svg style="left:82%;top:26%" width="10" height="10" viewBox="-16 -16 32 32"><path d="M0-15 3.2-3.2 15 0 3.2 3.2 0 15-3.2 3.2-15 0-3.2-3.2Z" fill="#ffc2d4"/></svg>
+        <svg style="left:22%;top:74%" width="12" height="12" viewBox="-16 -16 32 32"><path d="M0-15 3.2-3.2 15 0 3.2 3.2 0 15-3.2 3.2-15 0-3.2-3.2Z" fill="#e3b873"/></svg>
+      </div>
+
+      <div class="container hero__grid">
+
+        <!-- 1. lockup, then 2. the reserved portrait -->
+        <div class="hero__lockup">
+          <img class="logo-big" src="../public/logo-mark.png" alt="BOSS BADDIE">
+
+          <div class="hero__portrait">
+            <div class="frame frame--portrait" role="img"
+                 aria-label="Illustrated portrait of Patricia, founder of BOSS BADDIE, standing confidently">
+              <svg width="20" height="20" viewBox="-16 -16 32 32" aria-hidden="true"><path d="M0-15 3.2-3.2 15 0 3.2 3.2 0 15-3.2 3.2-15 0-3.2-3.2Z" fill="#e3b873" opacity=".8"/></svg>
+              <span class="frame__label">Founder portrait</span>
+              <span class="frame__note">Portrait 3:4 · reserved for your uploaded hero artwork</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- 3. headline, copy, CTA -->
+        <div class="center">
+          <h1 class="h1">Become Her</h1>
+          <p class="lede" style="margin-left:auto;margin-right:auto">
+            Boss Baddie is a space for women to build confidence, start small businesses,
+            and grow mentally, physically and spiritually.
+          </p>
+          <div class="hero__cta">
+            <div class="segment">
+              <a href="#about">Discover Our Story</a>
+              <a href="shop-page.html">Shop Essentials</a>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ========================= PILLARS ========================== -->
+    <section id="about" style="padding-bottom:8px">
+      <div class="container">
+        <div class="pillars">
+          <div class="pillar">
+            <svg class="pillar__icon" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" aria-hidden="true">
+              <circle cx="12" cy="12" r="9"/><path d="M8.5 12.5l2.5 2.5 4.5-5" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            <h3>Confidence</h3>
+            <p>Speak up, price your worth, take the space. Confidence is a habit you practise.</p>
+          </div>
+          <div class="pillar">
+            <svg class="pillar__icon" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" aria-hidden="true">
+              <circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.5 2" stroke-linecap="round"/>
+            </svg>
+            <h3>Discipline</h3>
+            <p>Show up on the days it is boring. Small promises kept compound into a business.</p>
+          </div>
+          <div class="pillar">
+            <svg class="pillar__icon" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" aria-hidden="true">
+              <path d="M12 3v18" stroke-linecap="round"/><path d="M7 8.5h10" stroke-linecap="round"/>
+            </svg>
+            <h3>Faith</h3>
+            <p>Pray over it, plan for it, then move. Manifesting is belief with a to-do list attached.</p>
+          </div>
+          <div class="pillar">
+            <svg class="pillar__icon" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" aria-hidden="true">
+              <circle cx="9" cy="9" r="3.4"/><circle cx="16.5" cy="10.5" r="2.6"/>
+              <path d="M3.5 20c0-3.3 2.5-5.6 5.5-5.6s5.5 2.3 5.5 5.6" stroke-linecap="round"/>
+            </svg>
+            <h3>Sisterhood</h3>
+            <p>No woman builds alone. We share suppliers, customers and hard-won lessons.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ======================== SHOWCASE ROW ====================== -->
+    <section id="community" style="padding:28px 0">
+      <div class="container">
+        <p class="eyebrow">The Look</p>
+        <h2 class="h3" style="font-size:22px;margin:8px 0 16px">Real women, real orders</h2>
+
+        <div class="showcase">
+          <div class="frame frame--portrait" role="img" aria-label="Hand holding a BOSS BADDIE printed phone case">
+            <span class="frame__label">Showcase 1</span>
+            <span class="frame__note">Product in hand</span>
+          </div>
+          <div class="frame frame--portrait" role="img" aria-label="Custom BOSS BADDIE phone case shown beside the customer who ordered it">
+            <span class="frame__label">Showcase 2</span>
+            <span class="frame__note">Custom order</span>
+          </div>
+          <div class="frame frame--portrait" role="img" aria-label="BOSS BADDIE case and tempered glass on a plain studio background">
+            <span class="frame__label">Showcase 3</span>
+            <span class="frame__note">Studio flat lay</span>
+          </div>
+          <div class="frame frame--portrait" role="img" aria-label="Solomon Islands woman working on her small business">
+            <span class="frame__label">Showcase 4</span>
+            <span class="frame__note">Woman at work</span>
+          </div>
+        </div>
+
+        <a class="pill" href="shop-page.html" style="margin-top:16px;width:100%;justify-content:center;min-height:56px">Shop all</a>
+      </div>
+    </section>
+
+    <!-- ========================== TAGLINE ========================= -->
+    <section class="center" style="padding:8px 0 40px">
+      <p class="container" style="font-family:var(--display);font-size:24px;margin:0">
+        Empowered women empower women.
+      </p>
+    </section>
+
+    <!-- ========================== FOOTER ========================== -->
+    <footer class="footer" id="contact">
+      <div class="container footer__strip">
+        <div class="footer__socials">
+          <a href="#" aria-label="BOSS BADDIE on Instagram">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true">
+              <rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/>
+              <circle cx="17.2" cy="6.8" r="1.1" fill="currentColor" stroke="none"/>
+            </svg>
+            Instagram
+          </a>
+          <a href="#" aria-label="BOSS BADDIE on TikTok">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true">
+              <path d="M14 4v9.2a3.2 3.2 0 1 1-3.2-3.2h.7" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M14 4c.4 2.4 2 3.9 4.4 4.1" stroke-linecap="round"/>
+            </svg>
+            TikTok
+          </a>
+        </div>
+
+        <div class="footer__meta">
+          <a href="tel:+6770000000">+677 000 0000</a>
+          <span>Solomon Islands</span>
+        </div>
+      </div>
+
+      <div class="container footer__legal">
+        <nav class="footer__quick" aria-label="Footer navigation">
+          <a href="#about">About Us</a>
+          <a href="shop-page.html">Shop</a>
+          <a href="#community">Community</a>
+          <a href="#contact">Contact</a>
+        </nav>
+        <div class="footer__bottom">
+          <span>Cash on collection only.</span>
+          <span>© 2026 BOSS BADDIE</span>
+        </div>
+      </div>
+    </footer>
+
+  </div>
+</div>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,588 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>BOSS BADDIE — Shop Page Mockup</title>
+<link rel="stylesheet" href="mockup.css">
+<style>
+  /* Both breakpoints are shown in this one file so the grid rule is explicit:
+     4 columns on desktop, 2 columns on mobile. */
+  .phone .container { padding: 0 16px; }
+  .phone .section { padding: 28px 0 48px; }
+  .phone .h2 { font-size: 26px; }
+  .phone .product-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+  .phone .product__body { padding: 12px 12px 16px; gap: 6px; }
+  .phone .product__title { font-size: 14px; }
+  .phone .product__tagline { font-size: 11px; }
+  .phone .shop-layout { grid-template-columns: 1fr; gap: 20px; }
+
+  /* Every card carries the same pair: Order Now goes straight to the order form,
+     Add To Bag keeps her on the grid. Stacked, because at four cards across two
+     uppercase labels will not sit on one line. */
+  .product__actions { display: grid; gap: 8px; }
+</style>
+<!--
+  MOCKUP 3 of 3 — SHOP PAGE
+  =========================
+  Desktop view first, then the same page inside a phone bezel.
+
+  Grid:  4 columns from 1280px, 3 at tablet, 2 on mobile.
+  Filters: minimal sidebar — category and sort only. Which phones a product
+           fits is shown on the product page instead. On mobile the sidebar
+           collapses into a <details> drawer, closed by default, so the
+           products stay above the fold.
+
+
+  In the Next.js build all filter state lives in the URL query string and the
+  filtered grid is rendered on the server, so a filtered view is a plain
+  cacheable HTML response — deliberate for slow Pacific connections.
+
+  IMAGE RULE: every tile here is a generated product mockup (inline SVG).
+  No illustrated women, no cartoon or anime art.
+-->
+</head>
+<body>
+
+<p class="mockup-caption"><b>Mockup 3 / 3</b> &nbsp;·&nbsp; Shop page &nbsp;·&nbsp; desktop 4-col + mobile 2-col</p>
+
+<div class="shell">
+
+<!-- ============================ HEADER ============================ -->
+<header class="header">
+  <div class="container header__bar">
+    <a class="header__logo" href="desktop-homepage.html" aria-label="BOSS BADDIE home">
+      <img src="../public/logo.png" alt="BOSS BADDIE">
+    </a>
+    <nav class="nav" aria-label="Main">
+      <a href="desktop-homepage.html">Home</a>
+      <a href="desktop-homepage.html#about">About Us</a>
+      <a href="#" aria-current="page">Shop</a>
+      <a href="desktop-homepage.html#community">Community</a>
+      <a href="desktop-homepage.html#contact">Contact</a>
+    </nav>
+    <div class="header__actions">
+      <a class="bag" href="#bag" aria-label="Bag, 2 items">Bag <span class="bag__count">2</span></a>
+      <a class="pill" href="desktop-homepage.html#contact">
+        Book a Chat
+        <svg width="11" height="7" viewBox="0 0 11 7" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true">
+          <path d="M1 1l4.5 4.5L10 1" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </a>
+    </div>
+  </div>
+</header>
+
+<!-- ========================== PAGE BANNER ========================= -->
+<section class="section section--tight" style="position:relative;overflow:hidden">
+  <div class="sparkles" aria-hidden="true">
+    <svg style="left:12%;top:22%" width="12" height="12" viewBox="-16 -16 32 32"><path d="M0-15 3.2-3.2 15 0 3.2 3.2 0 15-3.2 3.2-15 0-3.2-3.2Z" fill="#e3b873"/></svg>
+    <svg style="left:78%;top:60%" width="16" height="16" viewBox="-16 -16 32 32"><path d="M0-15 3.2-3.2 15 0 3.2 3.2 0 15-3.2 3.2-15 0-3.2-3.2Z" fill="#e3b873"/></svg>
+    <svg style="left:56%;top:16%" width="9"  height="9"  viewBox="-16 -16 32 32"><path d="M0-15 3.2-3.2 15 0 3.2 3.2 0 15-3.2 3.2-15 0-3.2-3.2Z" fill="#ffc2d4"/></svg>
+  </div>
+  <svg class="floral floral--tr" viewBox="0 0 300 300" fill="none" stroke="#ff4b8b" stroke-width="1.2" aria-hidden="true">
+    <path d="M300 20C250 40 214 78 196 128"/>
+    <path d="M196 128c-26-18-30-56-4-76 18 22 18 54 4 76Z"/>
+    <path d="M196 128c30-10 62 12 60 42-30 6-56-14-60-42Z"/>
+    <circle cx="196" cy="128" r="7"/>
+  </svg>
+  <div class="container">
+    <p class="eyebrow">The Shop</p>
+    <h1 class="h2" style="font-size:48px">Everything, in one place</h1>
+    <p class="prose" style="max-width:52ch">Phone cases, screen protection and small daily reminders — made for the woman who is building something.</p>
+  </div>
+</section>
+
+<hr class="rule">
+
+<!-- ============================= SHOP ============================= -->
+<section class="section section--tight">
+  <div class="container shop-layout">
+
+    <!-- ---------------------- SIDEBAR FILTERS ------------------- -->
+    <aside aria-label="Filter products">
+
+      <div class="filters">
+        <div class="filters__group">
+          <p class="filters__title">Category</p>
+          <label class="check"><input type="checkbox"> Phone &amp; Accessories <span class="check__count">10</span></label>
+          <label class="check"><input type="checkbox"> Beauty &amp; Health <span class="check__count">0</span></label>
+          <label class="check"><input type="checkbox"> Journals <span class="check__count">1</span></label>
+          <label class="check"><input type="checkbox"> Fitness <span class="check__count">0</span></label>
+          <label class="check"><input type="checkbox"> Clothing &amp; Fashion <span class="check__count">1</span></label>
+        </div>
+
+        <div class="filters__group">
+          <p class="filters__title">Sort</p>
+          <select class="product__select" aria-label="Sort products">
+            <option>Featured first</option>
+            <option>Price: low to high</option>
+            <option>Price: high to low</option>
+            <option>Newest</option>
+          </select>
+        </div>
+
+        <div class="filters__group" style="border-bottom:0">
+          <button class="btn btn--outline btn--block" type="button">Clear all</button>
+        </div>
+
+        <!-- The payment rule sits in the sidebar so it is read before, not
+             after, someone fills a bag. -->
+        <div class="payment-note">
+          <strong>Pay cash when you collect</strong>
+          No card payment and no bank transfer on this site. You send the order,
+          Patricia confirms the total and tells you where to collect it.
+        </div>
+      </div>
+
+    </aside>
+
+    <!-- -------------------------- RESULTS ---------------------- -->
+    <div>
+      <div class="shop-toolbar">
+        <p class="muted" style="margin:0;font-size:13px">Showing <b class="rose">12</b> products</p>
+      </div>
+
+      <div class="product-grid">
+
+        <!-- 1 · Signature Noir Case — 130 -->
+        <article class="product">
+          <div class="product__art">
+            <span class="product__badge">Bestseller</span>
+            <svg width="110" height="200" viewBox="0 0 120 220" aria-hidden="true">
+              <rect x="6" y="6" width="108" height="208" rx="20" fill="#0b0709" stroke="#ff4b8b" stroke-width="1.4"/>
+              <rect x="16" y="16" width="88" height="188" rx="14" fill="#701938" opacity=".45"/>
+              <rect x="26" y="26" width="34" height="34" rx="9" fill="none" stroke="#f8f8f8" stroke-opacity=".3"/>
+              <text x="60" y="120" text-anchor="middle" fill="#f8f8f8" font-family="Georgia,serif" font-size="15">BOSS</text>
+              <text x="60" y="140" text-anchor="middle" fill="#ff4b8b" font-family="Georgia,serif" font-size="15">BADDIE</text>
+            </svg>
+          </div>
+          <div class="product__body">
+            <h3 class="product__title">Signature Noir Case</h3>
+            <p class="product__tagline">Matte black, rose wordmark</p>
+            <p class="product__price"><b>SBD $130</b></p>
+            <div class="product__actions">
+              <button class="btn btn--solid btn--block" type="button">Order Now</button>
+              <button class="btn btn--outline btn--block" type="button">Add To Bag</button>
+            </div>
+          </div>
+        </article>
+
+        <!-- 2 · Manifest Case — Blush — 120 / was 145 -->
+        <article class="product">
+          <div class="product__art">
+            <span class="product__save">Save $25</span>
+            <svg width="110" height="200" viewBox="0 0 120 220" aria-hidden="true">
+              <rect x="6" y="6" width="108" height="208" rx="20" fill="#0b0709" stroke="#ffc2d4" stroke-width="1.4"/>
+              <rect x="16" y="16" width="88" height="188" rx="14" fill="#ffc2d4" opacity=".16"/>
+              <rect x="26" y="26" width="34" height="34" rx="9" fill="none" stroke="#f8f8f8" stroke-opacity=".3"/>
+              <text x="60" y="126" text-anchor="middle" fill="#ffc2d4" font-family="Georgia,serif" font-size="13" font-style="italic">manifest</text>
+              <path d="M40 148h40" stroke="#ff4b8b" stroke-width="1"/>
+            </svg>
+          </div>
+          <div class="product__body">
+            <h3 class="product__title">Manifest Case — Blush</h3>
+            <p class="product__tagline">Soft blush, script affirmation</p>
+            <p class="product__price"><b>SBD $120</b> <s>SBD $145</s></p>
+            <div class="product__actions">
+              <button class="btn btn--solid btn--block" type="button">Order Now</button>
+              <button class="btn btn--outline btn--block" type="button">Add To Bag</button>
+            </div>
+          </div>
+        </article>
+
+        <!-- 3 · Hibiscus Line Case — 135 -->
+        <article class="product">
+          <div class="product__art">
+            <svg width="110" height="200" viewBox="0 0 120 220" aria-hidden="true">
+              <rect x="6" y="6" width="108" height="208" rx="20" fill="#0b0709" stroke="#ff4b8b" stroke-width="1.4"/>
+              <rect x="16" y="16" width="88" height="188" rx="14" fill="#701938" opacity=".35"/>
+              <rect x="26" y="26" width="34" height="34" rx="9" fill="none" stroke="#f8f8f8" stroke-opacity=".3"/>
+              <g stroke="#ffc2d4" stroke-width="1" fill="none" opacity=".85" transform="translate(60 132)">
+                <path d="M0-26c14-8 26 2 24 16-14 6-24-4-24-16Z"/>
+                <path d="M0-26c-14-8-26 2-24 16 14 6 24-4 24-16Z"/>
+                <path d="M0-26c8 14-2 26-16 24-6-14 4-24 16-24Z"/>
+                <circle cx="0" cy="-24" r="4"/><path d="M0-20v34"/>
+              </g>
+            </svg>
+          </div>
+          <div class="product__body">
+            <h3 class="product__title">Hibiscus Line Case</h3>
+            <p class="product__tagline">Pacific floral line-art</p>
+            <p class="product__price"><b>SBD $135</b></p>
+            <div class="product__actions">
+              <button class="btn btn--solid btn--block" type="button">Order Now</button>
+              <button class="btn btn--outline btn--block" type="button">Add To Bag</button>
+            </div>
+          </div>
+        </article>
+
+        <!-- 4 · Crown Gold Case — 150 -->
+        <article class="product">
+          <div class="product__art">
+            <span class="product__badge">New</span>
+            <svg width="110" height="200" viewBox="0 0 120 220" aria-hidden="true">
+              <rect x="6" y="6" width="108" height="208" rx="20" fill="#0b0709" stroke="#e3b873" stroke-width="1.4"/>
+              <rect x="16" y="16" width="88" height="188" rx="14" fill="#0b0709"/>
+              <rect x="26" y="26" width="34" height="34" rx="9" fill="none" stroke="#f8f8f8" stroke-opacity=".3"/>
+              <path d="M42 128l6-16 12 10 12-10 6 16Z" fill="none" stroke="#e3b873" stroke-width="1.4"/>
+              <text x="60" y="152" text-anchor="middle" fill="#e3b873" font-family="Georgia,serif" font-size="11" letter-spacing="2">HER</text>
+            </svg>
+          </div>
+          <div class="product__body">
+            <h3 class="product__title">Crown Gold Case</h3>
+            <p class="product__tagline">Gold crown, editorial black</p>
+            <p class="product__price"><b>SBD $150</b></p>
+            <div class="product__actions">
+              <button class="btn btn--solid btn--block" type="button">Order Now</button>
+              <button class="btn btn--outline btn--block" type="button">Add To Bag</button>
+            </div>
+          </div>
+        </article>
+
+        <!-- 5 · Custom Name Case — 165 -->
+        <article class="product">
+          <div class="product__art">
+            <svg width="110" height="200" viewBox="0 0 120 220" aria-hidden="true">
+              <rect x="6" y="6" width="108" height="208" rx="20" fill="#0b0709" stroke="#ff4b8b" stroke-width="1.4"/>
+              <rect x="16" y="16" width="88" height="188" rx="14" fill="#701938" opacity=".28"/>
+              <rect x="26" y="26" width="34" height="34" rx="9" fill="none" stroke="#f8f8f8" stroke-opacity=".3"/>
+              <rect x="30" y="112" width="60" height="26" rx="4" fill="none" stroke="#ffc2d4" stroke-dasharray="3 3"/>
+              <text x="60" y="129" text-anchor="middle" fill="#ffc2d4" font-family="Georgia,serif" font-size="11">your name</text>
+            </svg>
+          </div>
+          <div class="product__body">
+            <h3 class="product__title">Custom Name Case</h3>
+            <p class="product__tagline">Made to order, your name</p>
+            <p class="product__price"><b>SBD $165</b></p>
+            <div class="product__actions">
+              <button class="btn btn--solid btn--block" type="button">Order Now</button>
+              <button class="btn btn--outline btn--block" type="button">Add To Bag</button>
+            </div>
+          </div>
+        </article>
+
+        <!-- 6 · 9H Tempered Glass — Clear — 50 -->
+        <article class="product">
+          <div class="product__art">
+            <svg width="110" height="200" viewBox="0 0 120 220" aria-hidden="true">
+              <rect x="14" y="14" width="92" height="192" rx="12" fill="#f8f8f8" opacity=".07" stroke="#f8f8f8" stroke-opacity=".28"/>
+              <path d="M20 40 100 20" stroke="#ffc2d4" stroke-opacity=".5"/>
+              <path d="M20 60 100 34" stroke="#ffc2d4" stroke-opacity=".28"/>
+              <text x="60" y="118" text-anchor="middle" fill="#f8f8f8" font-family="Georgia,serif" font-size="20">9H</text>
+              <text x="60" y="136" text-anchor="middle" fill="#ffc2d4" font-family="Segoe UI,sans-serif" font-size="8" letter-spacing="2">TEMPERED</text>
+            </svg>
+          </div>
+          <div class="product__body">
+            <h3 class="product__title">9H Tempered Glass — Clear</h3>
+            <p class="product__tagline">Full-coverage, oleophobic</p>
+            <p class="product__price"><b>SBD $50</b></p>
+            <div class="product__actions">
+              <button class="btn btn--solid btn--block" type="button">Order Now</button>
+              <button class="btn btn--outline btn--block" type="button">Add To Bag</button>
+            </div>
+          </div>
+        </article>
+
+        <!-- 7 · Privacy Glass — 75 / was 90 -->
+        <article class="product">
+          <div class="product__art">
+            <span class="product__save">Save $15</span>
+            <svg width="110" height="200" viewBox="0 0 120 220" aria-hidden="true">
+              <rect x="14" y="14" width="92" height="192" rx="12" fill="#0b0709" stroke="#f8f8f8" stroke-opacity=".28"/>
+              <rect x="22" y="22" width="76" height="176" rx="8" fill="#701938" opacity=".4"/>
+              <path d="M60 100c14 0 24 10 24 14s-10 14-24 14-24-10-24-14 10-14 24-14Z" fill="none" stroke="#ffc2d4"/>
+              <path d="M40 100l40 28" stroke="#ff4b8b" stroke-width="1.6"/>
+            </svg>
+          </div>
+          <div class="product__body">
+            <h3 class="product__title">Privacy Glass</h3>
+            <p class="product__tagline">Side-angle blackout</p>
+            <p class="product__price"><b>SBD $75</b> <s>SBD $90</s></p>
+            <div class="product__actions">
+              <button class="btn btn--solid btn--block" type="button">Order Now</button>
+              <button class="btn btn--outline btn--block" type="button">Add To Bag</button>
+            </div>
+          </div>
+        </article>
+
+        <!-- 8 · Camera Lens Guard — 40 -->
+        <article class="product">
+          <div class="product__art">
+            <svg width="110" height="200" viewBox="0 0 120 220" aria-hidden="true">
+              <rect x="20" y="60" width="80" height="100" rx="16" fill="#0b0709" stroke="#f8f8f8" stroke-opacity=".22"/>
+              <circle cx="48" cy="92" r="15" fill="none" stroke="#ffc2d4"/>
+              <circle cx="48" cy="92" r="7"  fill="none" stroke="#ff4b8b"/>
+              <circle cx="78" cy="92" r="15" fill="none" stroke="#ffc2d4"/>
+              <circle cx="78" cy="92" r="7"  fill="none" stroke="#ff4b8b"/>
+              <circle cx="63" cy="128" r="15" fill="none" stroke="#ffc2d4"/>
+              <circle cx="63" cy="128" r="7"  fill="none" stroke="#ff4b8b"/>
+            </svg>
+          </div>
+          <div class="product__body">
+            <h3 class="product__title">Camera Lens Guard</h3>
+            <p class="product__tagline">Ring set, scratch proof</p>
+            <p class="product__price"><b>SBD $40</b></p>
+            <div class="product__actions">
+              <button class="btn btn--solid btn--block" type="button">Order Now</button>
+              <button class="btn btn--outline btn--block" type="button">Add To Bag</button>
+            </div>
+          </div>
+        </article>
+
+        <!-- 9 · Manifest Journal — 110 -->
+        <article class="product">
+          <div class="product__art">
+            <svg width="130" height="170" viewBox="0 0 140 180" aria-hidden="true">
+              <rect x="18" y="14" width="104" height="152" rx="6" fill="#701938" opacity=".55" stroke="#ffc2d4" stroke-opacity=".4"/>
+              <path d="M34 14v152" stroke="#0b0709" stroke-width="3"/>
+              <text x="78" y="84" text-anchor="middle" fill="#f8f8f8" font-family="Georgia,serif" font-size="14" font-style="italic">manifest</text>
+              <path d="M56 98h44" stroke="#e3b873"/>
+              <path d="M78 118l1.6 5.9 5.9 1.6-5.9 1.6L78 133l-1.6-5.9-5.9-1.6 5.9-1.6Z" fill="#e3b873"/>
+            </svg>
+          </div>
+          <div class="product__body">
+            <h3 class="product__title">Manifest Journal</h3>
+            <p class="product__tagline">90 days of guided pages</p>
+            <p class="product__price"><b>SBD $110</b></p>
+            <div class="product__actions">
+              <button class="btn btn--solid btn--block" type="button">Order Now</button>
+              <button class="btn btn--outline btn--block" type="button">Add To Bag</button>
+            </div>
+          </div>
+        </article>
+
+        <!-- 10 · Ring Holder — 55 -->
+        <article class="product">
+          <div class="product__art">
+            <svg width="120" height="170" viewBox="0 0 140 180" aria-hidden="true">
+              <rect x="34" y="30" width="72" height="120" rx="14" fill="#0b0709" stroke="#f8f8f8" stroke-opacity=".22"/>
+              <circle cx="70" cy="96" r="26" fill="none" stroke="#ff4b8b" stroke-width="2"/>
+              <circle cx="70" cy="96" r="17" fill="none" stroke="#ffc2d4" stroke-opacity=".6"/>
+              <path d="M70 60v10" stroke="#e3b873"/>
+            </svg>
+          </div>
+          <div class="product__body">
+            <h3 class="product__title">Ring Holder</h3>
+            <p class="product__tagline">One-hand grip, rose gold</p>
+            <p class="product__price"><b>SBD $55</b></p>
+            <div class="product__actions">
+              <button class="btn btn--solid btn--block" type="button">Order Now</button>
+              <button class="btn btn--outline btn--block" type="button">Add To Bag</button>
+            </div>
+          </div>
+        </article>
+
+        <!-- 11 · Boss Baddie Tote — 95, out of stock -->
+        <article class="product">
+          <div class="product__art">
+            <svg width="130" height="160" viewBox="0 0 140 180" aria-hidden="true">
+              <path d="M28 60h84l-8 100H36Z" fill="#0b0709" stroke="#ffc2d4" stroke-opacity=".5"/>
+              <path d="M56 60V44a14 14 0 0 1 28 0v16" fill="none" stroke="#ffc2d4" stroke-opacity=".5"/>
+              <text x="70" y="112" text-anchor="middle" fill="#ff4b8b" font-family="Georgia,serif" font-size="12">BOSS</text>
+              <text x="70" y="128" text-anchor="middle" fill="#f8f8f8" font-family="Georgia,serif" font-size="12">BADDIE</text>
+            </svg>
+            <div class="product__soldout">Sold out</div>
+          </div>
+          <div class="product__body">
+            <h3 class="product__title">Boss Baddie Tote</h3>
+            <p class="product__tagline">Heavy canvas, market ready</p>
+            <p class="product__price"><b>SBD $95</b></p>
+            <button class="btn btn--outline btn--block" type="button" disabled>Sold out</button>
+          </div>
+        </article>
+
+        <!-- 12 · Boss Starter Kit — 180 / was 220 -->
+        <article class="product">
+          <div class="product__art">
+            <span class="product__save">Save $40</span>
+            <svg width="130" height="170" viewBox="0 0 140 180" aria-hidden="true">
+              <rect x="16" y="46" width="52" height="100" rx="10" fill="#0b0709" stroke="#ff4b8b" stroke-opacity=".7"/>
+              <rect x="74" y="30" width="50" height="72" rx="5" fill="#701938" opacity=".55" stroke="#ffc2d4" stroke-opacity=".4"/>
+              <circle cx="98" cy="128" r="20" fill="none" stroke="#ff4b8b"/>
+              <path d="M42 92l2.2 8 8 2.2-8 2.2L42 113l-2.2-8.6-8-2.2 8-2.2Z" fill="#e3b873"/>
+            </svg>
+          </div>
+          <div class="product__body">
+            <h3 class="product__title">Boss Starter Kit</h3>
+            <p class="product__tagline">Case + glass + journal bundle</p>
+            <p class="product__price"><b>SBD $180</b> <s>SBD $220</s></p>
+            <div class="product__actions">
+              <button class="btn btn--solid btn--block" type="button">Order Now</button>
+              <button class="btn btn--outline btn--block" type="button">Add To Bag</button>
+            </div>
+          </div>
+        </article>
+
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ==================== MOBILE VIEW OF THE SAME PAGE ==================== -->
+<p class="mockup-caption" style="border-top:1px solid var(--line)">Same page on mobile &nbsp;·&nbsp; <b>2-column grid</b>, filters collapsed into a drawer</p>
+
+<div class="phone-stage">
+<div class="phone">
+  <div class="phone__notch" aria-hidden="true"><span></span></div>
+  <div class="phone__screen">
+
+    <header class="header">
+      <div class="container header__bar">
+        <a class="header__logo" href="desktop-homepage.html" aria-label="BOSS BADDIE home">
+          <img src="../public/logo.png" alt="BOSS BADDIE" style="height:46px">
+        </a>
+        <div style="display:flex;align-items:center;gap:12px">
+          <a class="bag" href="#bag" aria-label="Bag, 2 items"><span class="bag__count">2</span></a>
+          <button class="burger" type="button" aria-expanded="false" aria-label="Open menu">
+            <span></span><span></span><span></span>
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <section class="section">
+      <div class="container">
+        <p class="eyebrow">The Shop</p>
+        <h2 class="h2" style="margin-bottom:18px">Everything, in one place</h2>
+
+        <!-- collapsed by default so the products stay above the fold -->
+        <details class="filters-collapse" style="margin-bottom:16px">
+          <summary>Filter &amp; sort</summary>
+          <div style="padding:18px 4px 4px">
+            <p class="filters__title">Category</p>
+            <label class="check"><input type="checkbox"> Phone &amp; Accessories</label>
+            <label class="check"><input type="checkbox"> Beauty &amp; Health</label>
+            <label class="check"><input type="checkbox"> Journals</label>
+            <label class="check"><input type="checkbox"> Fitness</label>
+            <label class="check"><input type="checkbox"> Clothing &amp; Fashion</label>
+            <select class="product__select" aria-label="Sort products" style="margin-top:14px;min-height:48px">
+              <option>Featured first</option>
+              <option>Price: low to high</option>
+              <option>Price: high to low</option>
+            </select>
+          </div>
+        </details>
+
+        <p class="muted" style="font-size:13px;margin:0 0 14px">Showing <b class="rose">12</b> products</p>
+
+        <div class="product-grid">
+          <article class="product">
+            <div class="product__art">
+              <span class="product__badge">Best</span>
+              <svg width="76" height="140" viewBox="0 0 120 220" aria-hidden="true">
+                <rect x="6" y="6" width="108" height="208" rx="20" fill="#0b0709" stroke="#ff4b8b" stroke-width="1.6"/>
+                <rect x="16" y="16" width="88" height="188" rx="14" fill="#701938" opacity=".45"/>
+                <text x="60" y="120" text-anchor="middle" fill="#f8f8f8" font-family="Georgia,serif" font-size="16">BOSS</text>
+                <text x="60" y="142" text-anchor="middle" fill="#ff4b8b" font-family="Georgia,serif" font-size="16">BADDIE</text>
+              </svg>
+            </div>
+            <div class="product__body">
+              <h3 class="product__title">Signature Noir Case</h3>
+              <p class="product__price"><b>SBD $130</b></p>
+              <button class="btn btn--solid btn--block" type="button" style="min-height:48px">Add</button>
+            </div>
+          </article>
+
+          <article class="product">
+            <div class="product__art">
+              <span class="product__save">-$25</span>
+              <svg width="76" height="140" viewBox="0 0 120 220" aria-hidden="true">
+                <rect x="6" y="6" width="108" height="208" rx="20" fill="#0b0709" stroke="#ffc2d4" stroke-width="1.6"/>
+                <rect x="16" y="16" width="88" height="188" rx="14" fill="#ffc2d4" opacity=".16"/>
+                <text x="60" y="126" text-anchor="middle" fill="#ffc2d4" font-family="Georgia,serif" font-size="14" font-style="italic">manifest</text>
+              </svg>
+            </div>
+            <div class="product__body">
+              <h3 class="product__title">Manifest Case</h3>
+              <p class="product__price"><b>SBD $120</b> <s>$145</s></p>
+              <button class="btn btn--solid btn--block" type="button" style="min-height:48px">Add</button>
+            </div>
+          </article>
+
+          <article class="product">
+            <div class="product__art">
+              <svg width="76" height="140" viewBox="0 0 120 220" aria-hidden="true">
+                <rect x="6" y="6" width="108" height="208" rx="20" fill="#0b0709" stroke="#e3b873" stroke-width="1.6"/>
+                <rect x="16" y="16" width="88" height="188" rx="14" fill="#0b0709"/>
+                <path d="M42 128l6-16 12 10 12-10 6 16Z" fill="none" stroke="#e3b873" stroke-width="1.8"/>
+              </svg>
+            </div>
+            <div class="product__body">
+              <h3 class="product__title">Crown Gold Case</h3>
+              <p class="product__price"><b>SBD $150</b></p>
+              <button class="btn btn--solid btn--block" type="button" style="min-height:48px">Add</button>
+            </div>
+          </article>
+
+          <article class="product">
+            <div class="product__art">
+              <svg width="76" height="140" viewBox="0 0 120 220" aria-hidden="true">
+                <rect x="14" y="14" width="92" height="192" rx="12" fill="#f8f8f8" opacity=".07" stroke="#f8f8f8" stroke-opacity=".28"/>
+                <text x="60" y="122" text-anchor="middle" fill="#f8f8f8" font-family="Georgia,serif" font-size="22">9H</text>
+              </svg>
+            </div>
+            <div class="product__body">
+              <h3 class="product__title">9H Glass — Clear</h3>
+              <p class="product__price"><b>SBD $50</b></p>
+              <button class="btn btn--solid btn--block" type="button" style="min-height:48px">Add</button>
+            </div>
+          </article>
+        </div>
+
+        <div class="payment-note" style="margin-top:20px">
+          <strong>Pay cash when you collect</strong>
+          No card payment and no bank transfer on this site.
+        </div>
+      </div>
+    </section>
+
+  </div>
+</div>
+</div>
+
+<!-- ============================ FOOTER ============================ -->
+<footer class="footer">
+  <div class="container footer__strip">
+    <div class="footer__socials">
+      <a href="#" aria-label="BOSS BADDIE on Instagram">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true">
+          <rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/>
+          <circle cx="17.2" cy="6.8" r="1.1" fill="currentColor" stroke="none"/>
+        </svg>
+        Instagram
+      </a>
+      <a href="#" aria-label="BOSS BADDIE on TikTok">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true">
+          <path d="M14 4v9.2a3.2 3.2 0 1 1-3.2-3.2h.7" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M14 4c.4 2.4 2 3.9 4.4 4.1" stroke-linecap="round"/>
+        </svg>
+        TikTok
+      </a>
+    </div>
+
+    <div class="footer__meta">
+      <a href="tel:+6770000000">+677 000 0000</a>
+      <span>Solomon Islands</span>
+    </div>
+  </div>
+
+  <div class="container footer__legal">
+    <nav class="footer__quick" aria-label="Footer navigation">
+      <a href="desktop-homepage.html#about">About Us</a>
+      <a href="#">Shop</a>
+      <a href="desktop-homepage.html#community">Community</a>
+      <a href="desktop-homepage.html#contact">Contact</a>
+    </nav>
+    <div class="footer__bottom">
+      <span>No online card payment. Collect in person and pay cash.</span>
+      <span>© 2026 BOSS BADDIE · Founded by Patricia</span>
+    </div>
+  </div>
+</footer>
+
+</div>
+
+</body>
+</html>

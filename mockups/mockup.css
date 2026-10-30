@@ -1,0 +1,651 @@
+/* ==========================================================================
+   BOSS BADDIE — mockup stylesheet
+   ==========================================================================
+   Shared by the three static mockups in this folder. These files are the
+   design reference for the Next.js build: same palette, same type scale, same
+   spacing rhythm. They are plain HTML/CSS on purpose — open them straight from
+   disk in any browser, no build step, no install.
+
+   Palette (identical to tailwind.config.js)
+     background      #000000
+     primary accent  #ff4b8b   dusty rose-pink
+     secondary       #701938   muted burgundy
+     soft blush      #ffc2d4
+     text            #f8f8f8   off-white
+     sparkle gold    #e3b873
+
+   Typography is system-font-only (Georgia display / Segoe UI body). Nothing
+   here downloads a webfont — the brand ships to Solomon Islands connections.
+   ========================================================================== */
+
+:root {
+  --black: #000000;
+  --coal: #0b0709;
+  --rose: #ff4b8b;
+  --burgundy: #701938;
+  --blush: #ffc2d4;
+  --ink: #f8f8f8;
+  --gold: #e3b873;
+  --line: rgba(248, 248, 248, 0.12);
+  --frame-pink: #f2447f;
+
+  --display: Georgia, 'Times New Roman', 'Noto Serif', serif;
+  --body: 'Segoe UI', system-ui, -apple-system, 'Helvetica Neue', Arial, sans-serif;
+
+  --container: 1240px;
+}
+
+* { box-sizing: border-box; }
+
+html { -webkit-text-size-adjust: 100%; }
+
+/* The page sits inside a hot-pink frame; all content lives in a rounded
+   near-black shell (.shell) floating on top of it. Pure CSS gradients, so the
+   frame costs zero image weight. */
+body {
+  margin: 0;
+  background-color: var(--frame-pink);
+  background-image:
+    radial-gradient(60rem 40rem at 4% 8%, rgba(255, 140, 185, 0.85), transparent 68%),
+    radial-gradient(52rem 38rem at 96% 92%, rgba(112, 25, 56, 0.75), transparent 70%),
+    linear-gradient(150deg, #ff6aa5 0%, #f2447f 46%, #8d2148 100%);
+  background-attachment: fixed;
+  color: var(--ink);
+  font-family: var(--body);
+  font-size: 16px;
+  line-height: 1.65;
+  position: relative;
+  overflow-x: hidden;
+}
+
+.shell {
+  position: relative;
+  z-index: 10;
+  margin: 28px auto;
+  width: calc(100% - 4rem);
+  max-width: 1560px;
+  background: var(--black);
+  border-radius: 36px;
+  overflow: clip;                 /* clip, not hidden — keeps sticky working */
+  box-shadow: 0 40px 120px -30px rgba(0, 0, 0, 0.75);
+}
+
+/* Pacific floral line-art on the pink margin, behind the shell. */
+.frame-flora { position: fixed; inset: 0; z-index: 0; pointer-events: none; }
+.frame-flora svg { position: absolute; }
+
+
+/* Soft grain — an inline SVG turbulence filter, ~300 bytes, no network request.
+   Fixed and non-interactive so it sits over everything without catching clicks. */
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  pointer-events: none;
+  opacity: 0.055;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+img, svg { display: block; max-width: 100%; }
+a { color: inherit; text-decoration: none; }
+
+/* ---------- layout ------------------------------------------------------- */
+
+.container {
+  width: 100%;
+  max-width: var(--container);
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+.section { padding: 96px 0; position: relative; }
+.section--tight { padding: 64px 0; }
+
+.rule {
+  height: 1px;
+  border: 0;
+  margin: 0;
+  background: linear-gradient(90deg, transparent, var(--line) 18%, var(--line) 82%, transparent);
+}
+
+/* ---------- type -------------------------------------------------------- */
+
+.eyebrow {
+  font-size: 11px;
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+  color: var(--blush);
+  margin: 0;
+}
+
+.h1 {
+  font-family: var(--display);
+  font-size: 86px;
+  line-height: 0.92;
+  letter-spacing: -0.01em;
+  margin: 16px 0 0;
+  font-weight: 400;
+}
+
+.h2 {
+  font-family: var(--display);
+  font-size: 40px;
+  line-height: 1.1;
+  margin: 12px 0 0;
+  font-weight: 400;
+}
+
+.h3 {
+  font-family: var(--display);
+  font-size: 21px;
+  line-height: 1.25;
+  margin: 0;
+  font-weight: 400;
+}
+
+.lede {
+  font-size: 20px;
+  line-height: 1.55;
+  color: rgba(248, 248, 248, 0.74);
+  max-width: 46ch;
+  margin: 20px 0 0;
+}
+
+.prose {
+  font-size: 15px;
+  line-height: 1.75;
+  color: rgba(248, 248, 248, 0.66);
+  margin: 12px 0 0;
+}
+
+.muted { color: rgba(248, 248, 248, 0.55); }
+.rose { color: var(--rose); }
+.blush { color: var(--blush); }
+.gold { color: var(--gold); }
+.center { text-align: center; }
+.mx-auto { margin-left: auto; margin-right: auto; }
+
+/* ---------- buttons ----------------------------------------------------- */
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 52px;              /* touch-friendly on every mockup */
+  padding: 0 30px;
+  font-size: 12px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  border-radius: 999px;
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: opacity 0.2s ease, background-color 0.2s ease;
+}
+
+.btn--solid { background: var(--rose); color: #000; font-weight: 600; }
+.btn--solid:hover { opacity: 0.88; }
+
+.btn--outline { border-color: rgba(255, 75, 139, 0.7); color: var(--ink); background: transparent; }
+.btn--outline:hover { background: rgba(255, 75, 139, 0.1); }
+
+.btn--block { width: 100%; }
+
+/* Outlined pill — "Book a Chat" in the header, "Shop all" on the showcase row */
+.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  padding: 0 20px;
+  border: 1px solid rgba(248, 248, 248, 0.25);
+  border-radius: 999px;
+  font-size: 13px;
+  color: var(--ink);
+  white-space: nowrap;
+}
+.pill:hover { border-color: var(--rose); color: var(--rose); }
+
+/* Segmented CTA: two destinations sharing one pill, split by a hairline, so
+   the hero reads as a single object rather than two competing buttons. */
+.segment {
+  display: flex;
+  width: 100%;
+  max-width: 36rem;
+  border: 1px solid rgba(248, 248, 248, 0.2);
+  border-radius: 999px;
+  overflow: hidden;
+}
+.segment > * {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 56px;
+  padding: 0 24px;
+  font-size: 15px;
+  color: var(--ink);
+}
+.segment > * + * { border-left: 1px solid rgba(248, 248, 248, 0.15); }
+.segment > *:hover { background: rgba(255, 75, 139, 0.15); color: var(--blush); }
+
+
+/* ---------- surfaces ---------------------------------------------------- */
+
+.card {
+  border: 1px solid var(--line);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.02), rgba(255, 255, 255, 0));
+  border-radius: 4px;
+  padding: 28px;
+}
+
+.panel-burgundy {
+  border: 1px solid rgba(255, 194, 212, 0.16);
+  background: linear-gradient(160deg, rgba(112, 25, 56, 0.55), rgba(11, 7, 9, 0.9));
+  border-radius: 4px;
+  padding: 30px;
+}
+
+.chip {
+  display: inline-block;
+  font-size: 10px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  padding: 6px 12px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 75, 139, 0.4);
+  color: var(--blush);
+}
+
+/* Reserved-image frame.
+   ---------------------------------------------------------------
+   IMAGE RULE: the hero and Our Story slots are held for Patricia's own
+   illustrated character artwork. Nothing in these mockups draws a woman. The
+   dashed frame sits at the final aspect ratio so dropping the real file in
+   causes no layout shift. */
+.frame {
+  position: relative;
+  border: 1px dashed rgba(255, 75, 139, 0.45);
+  border-radius: 6px;
+  background:
+    radial-gradient(120% 90% at 30% 20%, rgba(112, 25, 56, 0.4), transparent 70%),
+    rgba(255, 255, 255, 0.015);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 24px;
+  text-align: center;
+}
+
+.frame__label {
+  font-size: 11px;
+  letter-spacing: 0.26em;
+  text-transform: uppercase;
+  color: var(--rose);
+}
+
+.frame__note {
+  font-size: 12px;
+  color: rgba(248, 248, 248, 0.5);
+  max-width: 28ch;
+  line-height: 1.5;
+}
+
+.frame--portrait { aspect-ratio: 3 / 4; }
+.frame--square { aspect-ratio: 1 / 1; }
+
+/* ---------- decoration -------------------------------------------------- */
+
+/* Sparkle positions are hard-coded, never random — the Next.js build renders
+   the same markup on the server and the client, so randomness would produce a
+   hydration mismatch. */
+.sparkles { position: absolute; inset: 0; pointer-events: none; overflow: hidden; }
+.sparkles svg { position: absolute; opacity: 0.5; }
+
+.floral { position: absolute; pointer-events: none; opacity: 0.16; }
+.floral--tr { top: -30px; right: -40px; width: 320px; }
+.floral--bl { bottom: -40px; left: -50px; width: 280px; transform: rotate(180deg); }
+
+.glow-rose {
+  position: absolute;
+  width: 520px;
+  height: 520px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255, 75, 139, 0.16), transparent 65%);
+  pointer-events: none;
+}
+
+/* ---------- header ------------------------------------------------------ */
+
+.header {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  background: rgba(0, 0, 0, 0.82);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--line);
+}
+
+.header__bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  min-height: 92px;
+}
+
+.header__logo img { height: 60px; width: auto; }
+
+/* Nav sits centred between the logo and the right-hand actions. */
+.nav { display: flex; flex: 1; align-items: center; justify-content: center; gap: 36px; }
+
+.nav a {
+  font-size: 15px;
+  color: rgba(248, 248, 248, 0.85);
+}
+.nav a:hover, .nav a[aria-current='page'] { color: var(--rose); }
+
+.header__actions { display: flex; align-items: center; gap: 14px; flex-shrink: 0; }
+
+.bag { display: inline-flex; align-items: center; gap: 8px; font-size: 11px; letter-spacing: 0.22em; text-transform: uppercase; }
+.bag__count {
+  min-width: 20px; height: 20px; padding: 0 6px;
+  border-radius: 999px; background: var(--rose); color: #000;
+  font-size: 10px; font-weight: 700; letter-spacing: 0;
+  display: inline-flex; align-items: center; justify-content: center;
+}
+
+/* hamburger — mobile mockup only */
+.burger {
+  width: 46px; height: 46px;
+  display: flex; flex-direction: column; justify-content: center; gap: 5px;
+  border: 1px solid var(--line); border-radius: 4px; background: transparent;
+  padding: 0 11px; cursor: pointer;
+}
+.burger span { display: block; height: 1.5px; background: var(--ink); }
+
+.menu-panel {
+  border-top: 1px solid var(--line);
+  background: rgba(0, 0, 0, 0.96);
+  padding: 12px 0 20px;
+}
+.menu-panel a {
+  display: block;
+  padding: 16px 0;                /* generous rows, easy to hit with a thumb */
+  font-size: 13px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  border-bottom: 1px solid var(--line);
+}
+
+/* ---------- hero -------------------------------------------------------- */
+
+.hero { position: relative; overflow: hidden; padding: 40px 0 56px; }
+
+.hero__grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr);
+  gap: 40px;
+  align-items: center;
+}
+
+/* The lockup: the big logo sits behind and to the left, the reserved portrait
+   card overlaps its right edge.
+
+   The calc pins the logo 8px inside the shell's left edge at any width — as far
+   left as it can go without being cropped, and the mark must never be cropped.
+     -32px         escapes the container's 40px padding out to the shell edge
+     max(0px, ...) adds back the shell margin that only exists once the shell is
+                   wider than the 1240px container
+   1304px = 1240px container + the shell's 2x32px outer margin. */
+.hero__lockup { position: relative; min-height: 420px; }
+/* z-index 20 puts the mark IN FRONT of the portrait so the tail of "BADDIE"
+   crosses over her card. Uses logo-mark.png (alpha-cut copy) because the
+   supplied logo.png has no transparency and would show as a black box. */
+.hero__lockup .logo-big {
+  position: absolute;
+  left: calc(-32px - max(0px, (100vw - 1304px) / 2));
+  top: 50%; transform: translateY(-50%);
+  height: 300px; width: auto; z-index: 20; pointer-events: none;
+}
+.hero__portrait { position: relative; z-index: 10; width: 330px; max-width: 100%; margin-left: auto; }
+.hero__portrait .frame { border-radius: 24px; }
+
+.hero__cta { display: flex; margin-top: 36px; }
+
+/* ---------- mantra ------------------------------------------------------ */
+
+.mantra { position: relative; text-align: center; padding: 88px 0; }
+.mantra__text {
+  font-family: var(--display);
+  font-size: 58px;
+  line-height: 1.16;
+  margin: 20px auto 0;
+  max-width: 22ch;
+  font-weight: 400;
+}
+.mantra__text em { font-style: italic; color: var(--blush); }
+
+/* ---------- pillars ----------------------------------------------------- */
+
+/* Four rounded cards in one row on desktop, two at tablet, one on a phone. */
+.pillars {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 16px;
+}
+.pillar {
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.015));
+  border-radius: 16px;
+  padding: 24px;
+}
+.pillar:hover { border-color: rgba(255, 75, 139, 0.35); }
+.pillar__icon { color: var(--rose); opacity: 0.8; }
+.pillar h3 { font-family: var(--body); font-size: 18px; font-weight: 600; margin: 24px 0 0; }
+.pillar p { font-size: 13px; line-height: 1.7; color: rgba(248, 248, 248, 0.55); margin: 12px 0 0; }
+
+/* ---------- showcase row ------------------------------------------------ */
+
+/* Five reserved slots for Patricia's uploaded photography. A grid, not a
+   carousel: every card is visible without a tap and no JS ships. */
+.showcase {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 12px;
+}
+.showcase .frame { border-radius: 16px; padding: 12px; gap: 6px; }
+.showcase .frame__note { font-size: 11px; max-width: 20ch; }
+
+
+/* ---------- products ---------------------------------------------------- */
+
+/* A grid, not a carousel: everything is visible without interaction, which
+   matters on a slow connection, and it ships zero carousel JavaScript. */
+.product-grid { display: grid; gap: 24px; grid-template-columns: repeat(4, minmax(0, 1fr)); }
+.product-grid--3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.product-grid--2 { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+
+.product {
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.02), transparent);
+}
+.product__art { position: relative; aspect-ratio: 5 / 6; background: var(--coal); display: flex; align-items: center; justify-content: center; }
+.product__badge {
+  position: absolute; top: 12px; left: 12px;
+  font-size: 9px; letter-spacing: 0.18em; text-transform: uppercase;
+  background: var(--rose); color: #000; padding: 5px 9px; border-radius: 999px; font-weight: 700;
+}
+.product__save {
+  position: absolute; top: 12px; right: 12px;
+  font-size: 9px; letter-spacing: 0.14em; text-transform: uppercase;
+  border: 1px solid rgba(227, 184, 115, 0.5); color: var(--gold);
+  padding: 5px 9px; border-radius: 999px;
+}
+.product__body { padding: 16px 16px 20px; display: flex; flex-direction: column; gap: 8px; flex: 1; }
+.product__title { font-family: var(--display); font-size: 16px; margin: 0; font-weight: 400; }
+.product__tagline { font-size: 12px; color: rgba(248, 248, 248, 0.5); margin: 0; }
+.product__price { display: flex; align-items: baseline; gap: 8px; margin-top: 2px; }
+.product__price b { font-size: 15px; font-weight: 600; }
+.product__price s { font-size: 12px; color: rgba(248, 248, 248, 0.38); }
+.product__select {
+  width: 100%; min-height: 42px; margin-top: 4px;
+  background: var(--coal); color: var(--ink);
+  border: 1px solid var(--line); border-radius: 3px; padding: 0 10px; font-size: 12px;
+}
+.product .btn { min-height: 44px; margin-top: 6px; font-size: 11px; }
+.product__soldout {
+  position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+  background: rgba(0, 0, 0, 0.66); font-size: 11px; letter-spacing: 0.24em; text-transform: uppercase; color: var(--blush);
+}
+
+/* ---------- shop -------------------------------------------------------- */
+
+.shop-layout { display: grid; grid-template-columns: 220px minmax(0, 1fr); gap: 44px; align-items: start; }
+
+.filters { position: sticky; top: 92px; }
+.filters__group { padding: 22px 0; border-bottom: 1px solid var(--line); }
+.filters__group:first-child { padding-top: 0; }
+.filters__title { font-size: 10px; letter-spacing: 0.26em; text-transform: uppercase; color: var(--blush); margin: 0 0 14px; }
+
+.check {
+  display: flex; align-items: center; gap: 12px;
+  min-height: 44px;                /* 44px targets — usable on a phone */
+  font-size: 13px; color: rgba(248, 248, 248, 0.8); cursor: pointer;
+}
+.check input { width: 16px; height: 16px; accent-color: var(--rose); }
+.check__count { margin-left: auto; font-size: 11px; color: rgba(248, 248, 248, 0.4); }
+
+.payment-note {
+  border: 1px solid rgba(255, 75, 139, 0.28);
+  background: rgba(112, 25, 56, 0.22);
+  border-radius: 4px;
+  padding: 18px;
+  font-size: 12px;
+  line-height: 1.6;
+  color: rgba(248, 248, 248, 0.74);
+}
+.payment-note strong { display: block; color: var(--blush); font-size: 12px; letter-spacing: 0.04em; margin-bottom: 6px; }
+
+.shop-toolbar { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding-bottom: 20px; border-bottom: 1px solid var(--line); margin-bottom: 28px; }
+.shop-toolbar select { background: var(--coal); color: var(--ink); border: 1px solid var(--line); border-radius: 3px; min-height: 42px; padding: 0 12px; font-size: 12px; }
+
+/* mobile filter drawer, collapsed by default */
+.filters-collapse summary {
+  list-style: none; cursor: pointer;
+  display: flex; align-items: center; justify-content: space-between;
+  min-height: 52px; padding: 0 16px;
+  border: 1px solid var(--line); border-radius: 4px;
+  font-size: 11px; letter-spacing: 0.22em; text-transform: uppercase;
+}
+.filters-collapse summary::-webkit-details-marker { display: none; }
+
+/* ---------- testimonials ------------------------------------------------ */
+
+.quotes { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 24px; }
+.quote__mark { color: var(--rose); opacity: 0.6; }
+.quote__text { font-family: var(--display); font-size: 17px; line-height: 1.55; margin: 14px 0 18px; }
+.quote__who { font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--blush); }
+
+/* ---------- footer ------------------------------------------------------ */
+
+/* A thin closing strip: socials left, phone + location right, then one quiet
+   line for quick links, the payment rule and the copyright. */
+.footer { border-top: 1px solid var(--line); }
+
+.footer__strip {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  padding: 20px 0;
+  flex-wrap: wrap;
+}
+.footer__meta { display: flex; flex-wrap: wrap; align-items: center; gap: 28px; }
+.footer__strip a, .footer__meta span {
+  display: inline-flex; align-items: center; gap: 10px;
+  min-height: 44px; font-size: 13px; color: rgba(248, 248, 248, 0.6);
+}
+.footer__strip a:hover { color: var(--rose); }
+.footer__socials { display: flex; gap: 24px; }
+
+.footer__legal { border-top: 1px solid rgba(248, 248, 248, 0.07); padding: 16px 0 24px; }
+.footer__quick { display: flex; flex-wrap: wrap; gap: 24px; }
+.footer__quick a { font-size: 12px; color: rgba(248, 248, 248, 0.45); }
+.footer__quick a:hover { color: var(--rose); }
+.footer__bottom {
+  display: flex; flex-wrap: wrap; gap: 10px; justify-content: space-between;
+  margin-top: 12px; font-size: 12px; color: rgba(248, 248, 248, 0.35);
+}
+
+/* ---------- mockup chrome ----------------------------------------------
+   The caption strip and phone bezel below are annotation for the mockup
+   files only. Nothing here exists in the production site. */
+
+.mockup-caption {
+  border-bottom: 1px solid var(--line);
+  padding: 14px 24px;
+  font-size: 11px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: rgba(248, 248, 248, 0.45);
+  background: #050305;
+}
+.mockup-caption b { color: var(--rose); font-weight: 600; }
+
+.phone-stage { padding: 32px 16px 60px; display: flex; justify-content: center; background: #050305; }
+.phone {
+  width: 390px;                 /* iPhone-class logical width */
+  max-width: 100%;
+  border: 10px solid #171215;
+  border-radius: 42px;
+  overflow: hidden;
+  background: var(--black);
+  box-shadow: 0 30px 90px rgba(255, 75, 139, 0.1);
+}
+.phone__notch { height: 26px; display: flex; align-items: center; justify-content: center; }
+.phone__notch span { width: 110px; height: 6px; border-radius: 999px; background: #171215; }
+.phone__screen { height: 820px; overflow-y: auto; }
+
+/* ---------- responsive -------------------------------------------------- */
+
+@media (max-width: 1024px) {
+  .shell { margin: 0; width: 100%; border-radius: 0; }
+  .frame-flora { display: none; }
+  .header__bar { min-height: 72px; }
+  .header__logo img { height: 46px; }
+  .hero__grid { grid-template-columns: 1fr; gap: 32px; }
+  .hero__lockup { min-height: 0; text-align: center; }
+  .hero__lockup .logo-big { position: static; transform: none; height: 150px; margin: 0 auto 28px; }
+  .hero__portrait { margin: 0 auto; width: 320px; }
+  .h1 { font-size: 60px; }
+  .mantra__text { font-size: 40px; }
+  .pillars { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .showcase { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .product-grid, .product-grid--3 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .quotes { grid-template-columns: 1fr; }
+  .shop-layout { grid-template-columns: 1fr; gap: 28px; }
+  .filters { position: static; }
+}
+
+@media (max-width: 640px) {
+  .section { padding: 60px 0; }
+  .container { padding: 0 18px; }
+  .h1 { font-size: 44px; }
+  .h2 { font-size: 30px; }
+  .lede { font-size: 17px; }
+  .mantra__text { font-size: 32px; }
+  .pillars { grid-template-columns: 1fr; }
+  .showcase { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .segment { flex-direction: column; border-radius: 24px; max-width: none; }
+  .segment > * + * { border-left: 0; border-top: 1px solid rgba(248, 248, 248, 0.15); }
+  .footer__strip { gap: 8px; }
+  .phone__screen { height: 720px; }
+}

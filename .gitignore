@@ -1,0 +1,37 @@
+# dependencies
+/node_modules
+
+# next.js build output
+/.next
+/out
+
+# production
+/build
+
+# local env files — never commit real credentials
+.env
+.env.local
+.env*.local
+
+# file-backed stores — orders.json holds customer data, products.json is edited
+# from /admin/products and is per-environment, so neither belongs in the repo
+/data
+
+# product photos Patricia uploads from the admin
+/public/uploads
+
+# database dumps — they contain customer data and belong off the repo
+/backups
+
+# misc
+.DS_Store
+*.pem
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Local PostgreSQL cluster used for previewing the site
+.pgdata/
+
+# IDE/agent local logs
+/.comate

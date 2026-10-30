@@ -1,0 +1,292 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* =========================================================
+   BOSS BADDIE — global brand layer
+   ---------------------------------------------------------
+   Palette
+     Background        #000000  deep black
+     Primary accent    #ff4b8b  dusty rose-pink
+     Secondary accent  #701938  muted burgundy
+     Soft blush        #ffc2d4
+     Text              #f8f8f8  off-white
+     Sparkles          #e3b873  gold
+
+   Typography is a system serif for display + system sans for body.
+   No webfonts at all: on a slow Solomon Islands connection a single
+   font file can cost more than the rest of the page combined.
+   ========================================================= */
+
+:root {
+  --font-display: Georgia, 'Times New Roman', 'Noto Serif', serif;
+  --font-body: 'Segoe UI', system-ui, -apple-system, 'Helvetica Neue', Arial, sans-serif;
+  --bb-rose: #ff4b8b;
+  --bb-burgundy: #701938;
+  --bb-blush: #ffc2d4;
+  --bb-gold: #e3b873;
+  --bb-frame-pink: #f2447f;
+}
+
+html {
+  scroll-behavior: smooth;
+  -webkit-text-size-adjust: 100%; /* stop iOS inflating text in landscape */
+}
+
+/* ---------------------------------------------------------
+   The page sits INSIDE a hot-pink frame: the body is pink,
+   and all content lives in a rounded near-black shell
+   (.bb-shell) that floats on top of it. Pure CSS gradients,
+   so the frame costs zero image weight.
+   --------------------------------------------------------- */
+body {
+  position: relative;
+  background-color: var(--bb-frame-pink);
+  color: #f8f8f8;
+  font-family: var(--font-body);
+  background-image:
+    radial-gradient(60rem 40rem at 4% 8%, rgba(255, 140, 185, 0.85), transparent 68%),
+    radial-gradient(52rem 38rem at 96% 92%, rgba(112, 25, 56, 0.75), transparent 70%),
+    linear-gradient(150deg, #ff6aa5 0%, #f2447f 46%, #8d2148 100%);
+  background-attachment: fixed;
+}
+
+/* ---------------------------------------------------------
+   Soft grain texture — the "editorial magazine print" feel.
+   An inline SVG noise filter, roughly 300 bytes, no request.
+   pointer-events:none so it never intercepts a tap.
+   --------------------------------------------------------- */
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  opacity: 0.055;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+@media (prefers-reduced-motion: reduce) {
+  /* Respect the OS setting; also saves battery and CPU on cheap phones. */
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Keyboard focus ring — an accessibility requirement on a black theme */
+:focus-visible {
+  outline: 2px solid var(--bb-rose);
+  outline-offset: 2px;
+  border-radius: 3px;
+}
+
+/* Rose scrollbar (progressive enhancement; ignored where unsupported) */
+* {
+  scrollbar-color: var(--bb-rose) #000;
+  scrollbar-width: thin;
+}
+
+@layer components {
+  /* ---------------- Layout ----------------
+     The rounded near-black panel that holds the entire site and floats on
+     the pink frame. Full-bleed on phones (no pink margin wasted on a small
+     screen), inset and rounded from `lg` up.
+
+     overflow-clip, not overflow-hidden: `hidden` would turn the shell into a
+     scroll container and break the sticky header. `clip` crops the corners
+     without doing that. */
+  .bb-shell {
+    @apply relative z-10 mx-auto w-full max-w-[1560px] bg-black
+           lg:my-7 lg:w-[calc(100%-4rem)] lg:overflow-clip lg:rounded-[36px]
+           lg:shadow-[0_40px_120px_-30px_rgba(0,0,0,0.75)];
+  }
+
+  .bb-container {
+    @apply mx-auto w-full max-w-[1240px] px-5 sm:px-8 lg:px-10;
+  }
+
+  /* Generous vertical rhythm — editorial layouts breathe */
+  .bb-section {
+    @apply py-16 sm:py-24;
+  }
+
+  /* ---------------- Typography ---------------- */
+
+  /* Small letter-spaced label above a heading */
+  .bb-eyebrow {
+    @apply text-[11px] font-semibold uppercase tracking-editorial text-bbRose;
+  }
+
+  /* Serif section heading */
+  .bb-h2 {
+    @apply font-display text-[28px] font-normal leading-[1.12] tracking-tight text-bbInk sm:text-[40px];
+  }
+
+  .bb-h3 {
+    @apply font-display text-xl font-normal leading-snug text-bbInk sm:text-2xl;
+  }
+
+  /* Body copy inside editorial blocks */
+  .bb-prose {
+    @apply text-sm leading-[1.75] text-bbInk/70 sm:text-base;
+  }
+
+  /* Thin rose rule used between editorial blocks */
+  .bb-rule {
+    @apply h-px w-full bg-gradient-to-r from-transparent via-bbRose/40 to-transparent;
+  }
+
+  /* ---------------- Buttons ----------------
+     min-h 52px keeps every button a comfortable thumb target. */
+  .bb-btn {
+    @apply inline-flex min-h-[52px] items-center justify-center gap-2 px-8 text-[12px]
+           font-semibold uppercase tracking-[0.2em] transition-colors duration-200;
+  }
+
+  /* Primary CTA — solid dusty rose */
+  .bb-btn-solid {
+    @apply bb-btn bg-bbRose text-black hover:bg-bbBlush;
+  }
+
+  /* Secondary CTA — thin rose outline */
+  .bb-btn-outline {
+    @apply bb-btn border border-bbRose/70 bg-transparent text-bbInk hover:border-bbRose hover:bg-bbRose/10;
+  }
+
+  /* Tertiary — quiet text link with a rose underline on hover */
+  .bb-link {
+    @apply inline-flex items-center gap-1.5 text-sm font-semibold uppercase tracking-[0.16em]
+           text-bbRose underline-offset-4 hover:underline;
+  }
+
+  /* Outlined pill used for "Book a Chat" in the header */
+  .bb-pill {
+    @apply inline-flex min-h-[44px] items-center gap-2 rounded-full border border-bbInk/25 px-5
+           text-[13px] text-bbInk transition-colors hover:border-bbRose hover:text-bbRose;
+  }
+
+  /* Segmented CTA: two actions sharing one pill, split by a hairline.
+     One shape, two targets — the hero reads as a single object. */
+  .bb-segment {
+    @apply flex w-full max-w-xl flex-col overflow-hidden rounded-3xl border border-bbInk/20
+           sm:flex-row sm:rounded-full;
+  }
+
+  .bb-segment > * {
+    @apply flex min-h-[56px] flex-1 items-center justify-center gap-2 px-6 text-[15px]
+           text-bbInk transition-colors hover:bg-bbRose/15 hover:text-bbBlush;
+  }
+
+  /* Divider between the two halves: a bottom border when stacked on mobile,
+     a left border once they sit side by side. */
+  .bb-segment > * + * {
+    @apply border-t border-bbInk/15 sm:border-l sm:border-t-0;
+  }
+
+  /* ---------------- Surfaces ---------------- */
+
+  /* Flat editorial card: hairline border, barely-lifted black */
+  .bb-card {
+    @apply border border-bbLine bg-bbCoal/70 transition-colors duration-200 hover:border-bbRose/45;
+  }
+
+  /* Burgundy-tinted panel for quotes and testimonials */
+  .bb-panel-burgundy {
+    @apply border border-bbRose/20 bg-gradient-to-b from-bbBurgundy/35 to-black/60;
+  }
+
+  /* Rounded, barely-lifted card used for the four brand pillars */
+  .bb-pillar-card {
+    @apply rounded-2xl border border-white/[0.07] bg-gradient-to-b from-white/[0.06] to-white/[0.015]
+           p-6 transition-colors duration-200 hover:border-bbRose/35;
+  }
+
+  /* Reserved-image frame: dashed rose hairline over near-black */
+  .bb-frame {
+    @apply relative overflow-hidden border border-dashed border-bbRose/35 bg-[#080406];
+  }
+
+  .bb-chip {
+    @apply inline-flex items-center gap-1.5 border border-bbRose/40 bg-bbRose/10 px-3 py-1
+           text-[10px] font-semibold uppercase tracking-[0.18em] text-bbBlush;
+  }
+
+  /* ---------------- Forms ---------------- */
+  .bb-label {
+    @apply mb-2 block text-[11px] font-semibold uppercase tracking-[0.2em] text-bbBlush;
+  }
+
+  .bb-input {
+    /* 16px base font-size stops iOS Safari zooming the page on focus */
+    @apply w-full border border-bbLine bg-black/60 px-4 py-3 text-base text-bbInk
+           placeholder:text-bbInk/30 focus:border-bbRose focus:outline-none;
+  }
+}
+
+/* ---------------- Printing ----------------
+   Two documents get printed, and nothing else: the customer's invoice at
+   /invoice/<token> and the order sheet in /admin. So printing means "print the
+   document, not the site".
+
+
+   `visibility` rather than `display` on purpose: hiding an ancestor with display
+   would take the document down with it, whereas visibility lets the .bb-doc
+   subtree turn itself back on. Everything else — header, nav, buttons, the pink
+   frame — simply stops being painted.
+
+   Only ONE .bb-doc may be in the page when print is called. The admin renders the
+   sheet for the single order being printed, for exactly that reason. */
+/* Rendered only when printing. /admin uses it to put the order sheet for ONE order
+   into the page without it showing on screen. display:none is deliberate — a
+   wrapper hidden with visibility or opacity would still reach the paper, blank. */
+.bb-print-only {
+  display: none;
+}
+
+@media print {
+  body * {
+    visibility: hidden !important;
+  }
+
+  .bb-print-only {
+    display: block !important;
+  }
+
+
+  .bb-doc,
+  .bb-doc * {
+    visibility: visible !important;
+  }
+
+  /* Lift the document out of the site's layout so it starts at the top of the
+     sheet instead of wherever it happened to sit on screen. */
+  .bb-doc {
+    position: absolute !important;
+    left: 0 !important;
+    top: 0 !important;
+    width: 100% !important;
+    padding: 0 !important;
+    background: #fff !important;
+    color: #000 !important;
+  }
+
+  /* Never waste a customer's ink or paper on the near-black page behind it. */
+  html,
+  body {
+    background: #fff !important;
+  }
+
+  /* Buttons and helper text inside the document area that make no sense on paper. */
+  .bb-no-print {
+    display: none !important;
+  }
+
+  @page {
+    margin: 14mm;
+  }
+}
