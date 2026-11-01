@@ -184,9 +184,10 @@ app/
   api/account/register/   POST — start a sign-up: text a verification code
   api/account/verify/     POST — check the code, create the account, sign in
   api/account/verify/resend/  POST — another code, same pending sign-up
-  api/account/session/    POST sign in, DELETE sign out
+  api/account/login/request/  POST — text a code to an existing account
+  api/account/login/verify/   POST — check the code, issue the session
+  api/account/session/    DELETE sign out
   api/account/profile/    PATCH name / location / contact email
-  api/account/password/   PATCH behind the current password
   api/orders/          POST — create an order (signed-in customers only)
   api/community/messages/  GET new messages (?after=<id>), POST send one
   api/community/profile/   POST her community name and picture
@@ -206,11 +207,12 @@ lib/
   order-constants.js   status list + payment methods — safe for the browser
   my-invoices.js       the browser's own invoice list — safe for the browser
   auth.js              admin session signing and verification
-  community-auth.js    member password hashing + session — SERVER ONLY
-  customer-auth.js     shop account hashing + session — SERVER ONLY
-  customers.js         customer store: register, sign in, profile — SERVER ONLY
+  community-auth.js    owner password hashing + legacy member session — SERVER ONLY
+  customer-auth.js     shop session token (passwordless) — SERVER ONLY
+  customers.js         customer store: register, phone lookup, profile — SERVER ONLY
   current-customer.js  "who is signed in to the shop", for pages and routes
   verification.js      sign-up codes: generate, hash, expire, attempt limit
+  login-verification.js  login codes: generate, hash, expire, attempt limit
   sms.js               the SMS transport (console in dev, Twilio in production)
 
   community.js         chat messages — SERVER ONLY, Postgres
@@ -308,24 +310,20 @@ in Postgres. Set `CLOUDINARY_*` to send product photos and avatars to Cloudinary
 
 ## Accounts
 
-A shop account is a **phone number and a password**, and it is now **required to
-order**. That is a deliberate change: an order belongs to a person, not to one
-browser's `localStorage`, so her orders and invoices follow her to a new phone.
+A shop account is a **phone number**, and it is **required to order**. That is a
+deliberate change: an order belongs to a person, not to one browser's
+`localStorage`, so her orders and invoices follow her to a new phone.
 
-- `/account/register` — name, phone, optional village/suburb, password (8+ chars).
-  Then a **six-digit code by SMS**, which she types back. The account is created
-  by that second step and signs her in; there is no email anywhere in the flow.
-- `/account/login` — phone + password. The failure message is the same for a wrong
-  number and a wrong password, so the page cannot be used to check who shops here.
+- `/account/register` — name, phone, optional village/suburb. Then a **six-digit
+  code by SMS**, which she types back. The account is created by that second step
+  and signs her in; there is no email and no password anywhere in the flow.
+- `/account/login` — phone, then a **six-digit code by SMS**. There is no password
+  to remember. The request answers the same way whether the number has an account
+  or not, so it cannot be used to check who shops here.
 - `/account` — her orders newest-first, each with its status, its lines, the
   collection details Patricia arranged and a link to the invoice. Four counters on
   top: orders, to pay on collection, paid so far, open.
-- `/account/profile` — name, location, contact email, and a password change behind
-  the current password.
-- **Forgotten password** — there is no self-service form. Patricia opens
-  `/admin/community`, presses **Reset password**, and sends the temporary password
-  privately. The reset signs out older sessions; the customer should change it
-  after signing in.
+- `/account/profile` — name, location and contact email. No password.
 - **The shop is members-only.** `/shop` and every `/shop/<id>` page call
   `requireShopper()` (`lib/require-shopper.js`) and redirect to sign in with
   `?next=` pointing at the page she wanted, so she returns to it rather than to
@@ -342,21 +340,26 @@ never a login handle.
 
 ### The code is texted, and required
 
-Sign-up is two requests. `/api/account/register` validates the form, hashes the
-password, writes a row to `signup_verifications` and sends a text. **No customer
-row exists yet.** `/api/account/verify` checks the code, creates the customer and
-signs her in. So an unverified sign-up cannot log in, cannot order, and does not
-occupy the phone number — and if the SMS provider fails, the pending row is
-deleted rather than left as a half-made account.
+Sign-up is two requests. `/api/account/register` validates the form, writes a row
+to `signup_verifications` and sends a text. **No customer row exists yet.**
+`/api/account/verify` checks the code, creates the customer and signs her in. So an
+unverified sign-up cannot log in, cannot order, and does not occupy the phone
+number — and if the SMS provider fails, the pending row is deleted rather than left
+as a half-made account.
 
-The rules, all in `lib/verification.js`:
+Sign-in is the same idea. `/api/account/login/request` texts a code to an existing
+account; `/api/account/login/verify` checks it and issues the session. A number
+with no account gets the same response but no text.
+
+The rules apply to both `signup_verifications` and `customer_login_codes`:
 
 - Six digits, generated with `crypto.randomInt` — never `Math.random`.
 - Stored as an HMAC of phone + code, keyed with `CUSTOMER_SESSION_SECRET`. The
   database never holds a usable code, even if it leaks.
-- Ten minutes to live, five attempts, then the pending row is destroyed.
-- Sixty seconds between sends per number, on top of five sign-ups per address
-  per hour, so the endpoint cannot be used to bomb a phone or run up a bill.
+- Ten minutes to live, five attempts, then the row is destroyed.
+- Sixty seconds between sends per number. Registration is limited to five per
+  address per hour; login-code requests to ten per address per fifteen minutes and
+  five per number per hour.
 
 HOW THE TEXTS GO OUT is `SMS_PROVIDER` in `lib/sms.js`:
 
@@ -384,23 +387,23 @@ never be set on a deployed server. Adding a local aggregator (Our Telekom, a
 reseller) means one more branch in `sendSms()` and nothing else.
 
 WHAT IS STORED, and where: a `customers` row (name, phone, location, optional
-email, scrypt hash). No card, no address, nothing to charge. Every order now
+email). No password, no card, no address, nothing to charge. Every order now
 carries `customer_id`; the name, phone and location are still snapshotted on the
 order itself, so Patricia's order sheet and the printed invoice read exactly as
 they did before accounts existed, and an order survives its account being deleted
 (`ON DELETE SET NULL`, never `CASCADE`).
 
-HOW IT IS PROTECTED: a third signed httpOnly cookie (`bb_customer_session`,
-400 days — the longest browsers allow) with its own secret, deliberately different
-from the admin one. The expiry is slid forward while she uses the app:
+HOW IT IS PROTECTED: a signed httpOnly cookie (`bb_customer_session`, 400 days —
+the longest browsers allow) with its own secret, deliberately different from the
+admin one. The expiry is slid forward while she uses the app:
 `components/SessionKeeper.js` calls `/api/account/session/refresh` at most once a
 day and gets a fresh 400-day cookie, so the only thing that signs her out is
-logging out. Passwords are scrypt with a per-customer salt, imported from the same
-implementation the community uses. Sign-in is limited to 15 wrong attempts per
-address per 15 minutes; registration to 5 per hour; password changes to 10 per
-account per 15 minutes. The account pages and every account route take the
-customer from the cookie — there is no id in a URL or a body to tamper with, and
-`readOrdersForCustomer()` filters on `customer_id` alone.
+logging out. Codes are HMAC-hashed, single-use, expire in ten minutes and allow
+five attempts. Login-code requests are limited to ten per address per fifteen
+minutes and five per number per hour; registration to five per address per hour.
+The account pages and every account route take the customer from the cookie — there
+is no id in a URL or a body to tamper with, and `readOrdersForCustomer()` filters
+on `customer_id` alone.
 
 A shop account is also the community account: the same `customers` row signs in
 to the shop, the account pages and The Baddies Corner.
@@ -809,6 +812,8 @@ alive across deploys.
 - [ ] Changing the password signs out a second browser using the old session
 - [ ] Sign-up texts a code, and no account exists until the right code is entered
 - [ ] A wrong code is refused, and the fifth wrong code ends that sign-up
+- [ ] Logging out, then signing in with phone + a new texted code works
+- [ ] An unknown phone number gets the generic response and no code
 - [ ] `SMS_PROVIDER=console` prints the message in the server log; a real provider
       delivers it to a Solomon Islands number
 - [ ] `/checkout` sends a signed-out visitor to sign in, then back to checkout
@@ -817,7 +822,7 @@ alive across deploys.
       on the page that was asked for
 - [ ] The My Invoices tab is highlighted on `/shop/invoices`, and Shop is not
 - [ ] Signing in on a second browser shows the same orders and invoices
-- [ ] `/account/profile` saves details, and changing the password needs the old one
+- [ ] `/account/profile` saves details; there is no password field
 - [ ] The site installs from a phone home screen and opens without browser chrome
 - [ ] With the network off, a page falls back to `/offline`, and `/account` is never
       served from the cache
@@ -953,20 +958,21 @@ Already in place:
   single-use, and expire (30 minutes for resets, 24 hours for recovery).
 - The admin session carries the account id and a `session_version`. A password
   change or reset increments the version, invalidating every older cookie.
-- Customer sessions carry their own `session_version`; a password change or an
-  admin-issued temporary password invalidates every older cookie.
+- Customer sessions also carry a `session_version`, ready for a future revocation
+  step. Today, deleting the customer row blocks her at the next request.
+- Sign-up and login codes are HMAC-hashed, single-use, expire in ten minutes and
+  allow five attempts.
 - `/admin` checks the session in a server component and `redirect()`s before it
   reads any order data — nothing leaks into the HTML.
 - Order prices are **always** re-read from the catalogue server-side; whatever
   the browser claims a price is gets discarded. Quantities are clamped to 1–25.
 - Admin pages set `robots: { index: false }`.
-- Members' passwords are hashed with scrypt and a random 16-byte salt; the plain
-  password is never stored or logged. The member cookie is signed with its own
-  secret, and `/community/inside` redirects before it reads a single message.
+- The community uses the same passwordless customer session. `/community/inside`
+  redirects before it reads a single message.
 - Both community write paths take the author from the session cookie, never from
   the request body, so nobody can send a message under someone else's name. The
   same holds for profiles: there is no member id in any profile URL or payload, so
-  a member can only ever edit herself. Changing a password needs the current one.
+  a member can only ever edit herself.
 
 Not yet, and worth doing before scale:
 
@@ -983,16 +989,14 @@ Not yet, and worth doing before scale:
   that admin login always answers "those details do not match", which looks like
   a wrong password rather than a broken server. A boot-time check would be worth
   adding.
-- **Self-service password reset for customers.** Patricia can issue a temporary
-  password from `/admin/community`; a customer-facing SMS or email reset is still to
-  build.
+- **Production SMS.** Passwordless sign-in needs a real SMS provider. `console`
+  only prints codes to the server log and is development-only.
 - **Per-user accounts and an audit trail** once more than one person has access.
 - **CSRF tokens** on the admin and community mutation routes. Same-site cookies
   cover the common case, not every case.
 - **Session revocation.** A customer row is re-read on every request, so deleting
-  it blocks her immediately. Password changes and admin resets also invalidate
-  older cookies through `session_version`. Rotating `CUSTOMER_SESSION_SECRET` is
-  the break-glass for every session at once.
+  it blocks her immediately. Rotating `CUSTOMER_SESSION_SECRET` signs every account
+  out at once.
 
 Rotate `ADMIN_SESSION_SECRET` to invalidate every admin session, and
 `CUSTOMER_SESSION_SECRET` to sign every account — and every community session —

@@ -3,14 +3,14 @@
 import { useState } from 'react';
 
 /**
- * ProfileForm — the two things a customer can change: her details, and her password.
+ * ProfileForm — the details a customer can change: name, location and contact email.
  *
  * The phone number is shown but NOT editable. It is the login handle, and moving it
  * would have to move the session with it; today Patricia changes a number by hand.
  *
- * Both saves are PATCHes to routes that take the customer from the session cookie.
- * There is no id in either payload, so this form can only ever edit the person
- * using it.
+ * The save is a PATCH to a route that takes the customer from the session cookie.
+ * There is no id in the payload, so this form can only ever edit the person using
+ * it. There is no password: sign-in is a texted code.
  */
 export default function ProfileForm({ customer }) {
   const [details, setDetails] = useState({
@@ -19,9 +19,6 @@ export default function ProfileForm({ customer }) {
     email: customer.email ?? '',
   });
   const [detailsState, setDetailsState] = useState({ errors: [], saved: false, busy: false });
-
-  const [passwords, setPasswords] = useState({ currentPassword: '', nextPassword: '' });
-  const [passwordState, setPasswordState] = useState({ errors: [], saved: false, busy: false });
 
   async function saveDetails(event) {
     event.preventDefault();
@@ -42,29 +39,6 @@ export default function ProfileForm({ customer }) {
       setDetailsState({ errors: [], saved: true, busy: false });
     } catch {
       setDetailsState({ errors: ['Could not reach the server.'], saved: false, busy: false });
-    }
-  }
-
-  async function savePassword(event) {
-    event.preventDefault();
-    setPasswordState({ errors: [], saved: false, busy: true });
-
-    try {
-      const response = await fetch('/api/account/password', {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(passwords),
-      });
-      const data = await response.json().catch(() => ({}));
-
-      if (!response.ok || !data.ok) {
-        setPasswordState({ errors: data.errors ?? ['Could not change your password.'], saved: false, busy: false });
-        return;
-      }
-      setPasswordState({ errors: [], saved: true, busy: false });
-      setPasswords({ currentPassword: '', nextPassword: '' });
-    } catch {
-      setPasswordState({ errors: ['Could not reach the server.'], saved: false, busy: false });
     }
   }
 
@@ -126,49 +100,6 @@ export default function ProfileForm({ customer }) {
 
         <button type="submit" disabled={detailsState.busy} className="bb-btn-solid mt-5 w-full disabled:opacity-50 sm:w-auto">
           {detailsState.busy ? 'Saving…' : 'Save Details'}
-        </button>
-      </form>
-
-      {/* ---------------- Password ---------------- */}
-      <form onSubmit={savePassword} noValidate className="bb-card p-6 sm:p-8">
-        <h2 className="bb-h3">Password</h2>
-        <p className="mt-2 text-xs text-bbInk/45">
-          Your current password is required, so a borrowed phone with an open session cannot lock you
-          out.
-        </p>
-
-        <div className="mt-6 space-y-5">
-          <label className="block">
-            <span className="bb-label">Current password</span>
-            <input
-              type="password"
-              autoComplete="current-password"
-              value={passwords.currentPassword}
-              onChange={(event) => setPasswords((current) => ({ ...current, currentPassword: event.target.value }))}
-              required
-              className="bb-input"
-            />
-          </label>
-
-          <label className="block">
-            <span className="bb-label">New password</span>
-            <input
-              type="password"
-              autoComplete="new-password"
-              value={passwords.nextPassword}
-              onChange={(event) => setPasswords((current) => ({ ...current, nextPassword: event.target.value }))}
-              required
-              minLength={8}
-              className="bb-input"
-            />
-            <span className="mt-2 block text-xs text-bbInk/40">At least 8 characters.</span>
-          </label>
-        </div>
-
-        <Feedback state={passwordState} okMessage="Password changed." />
-
-        <button type="submit" disabled={passwordState.busy} className="bb-btn-solid mt-5 w-full disabled:opacity-50 sm:w-auto">
-          {passwordState.busy ? 'Changing…' : 'Change Password'}
         </button>
       </form>
     </div>

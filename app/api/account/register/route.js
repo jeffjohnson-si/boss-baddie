@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { hashPassword, isCustomerAuthConfigured } from '@/lib/customer-auth';
+import { isCustomerAuthConfigured } from '@/lib/customer-auth';
 import { formatPhone, phoneTaken, validateSignup } from '@/lib/customers';
 import {
   consumeVerification,
@@ -13,9 +13,9 @@ import { clientKey, hit } from '@/lib/rate-limit';
 /**
  * POST /api/account/register — step one of two.
  *
- * Nothing is created here. The form is validated, the password is hashed, a pending
- * verification row is stored and a six-digit code is texted to the number. The
- * account only exists once /api/account/verify accepts that code.
+ * Nothing is created here. The form is validated, a pending verification row is
+ * stored and a six-digit code is texted to the number. The account only exists
+ * once /api/account/verify accepts that code. There is no password.
  *
  * That ordering is what makes "you must receive the SMS" true rather than
  * decorative: an unverified sign-up cannot sign in, cannot order, and does not
@@ -66,7 +66,7 @@ export async function POST(request) {
     return NextResponse.json({ ok: false, errors: check.errors }, { status: 422 });
   }
 
-  const { phone, name, location, email, password } = check.values;
+  const { phone, name, location, email } = check.values;
 
   if (await phoneTaken(phone)) {
     return NextResponse.json(
@@ -83,9 +83,7 @@ export async function POST(request) {
     );
   }
 
-  // Hashed before the code is sent: the plain password never leaves this request.
-  const passwordHash = hashPassword(password);
-  const code = await startVerification({ phone, name, location, email, passwordHash });
+  const code = await startVerification({ phone, name, location, email });
 
   const sent = await sendVerificationSms(phone, code);
   if (!sent.ok) {

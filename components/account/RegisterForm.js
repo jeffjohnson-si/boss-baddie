@@ -7,14 +7,13 @@ import { useRouter } from 'next/navigation';
 /**
  * RegisterForm — create a shop account, in two steps.
  *
- *   1. Details (name, phone, password) -> POST /api/account/register, which texts a
+ *   1. Details (name, phone, location) -> POST /api/account/register, which texts a
  *      six-digit code. No account exists yet at this point.
  *   2. The code -> POST /api/account/verify, which creates the account and signs her
  *      in.
  *
- * WHY TWO STEPS: the phone number is the login handle, so it has to be proven before
- * it becomes one. Someone who mistypes a number cannot lock a stranger out of an
- * account, and a sign-up abandoned halfway leaves nothing behind.
+ * There is no password. The phone number is the login handle, and every new device
+ * is signed in with another texted code.
  *
  * The resend button counts down the same 60 seconds the server enforces, so the
  * interface never promises something the API will refuse.
@@ -32,7 +31,7 @@ export default function RegisterForm({ next = '/account' }) {
   const router = useRouter();
 
   const [step, setStep] = useState('details'); // 'details' | 'code'
-  const [form, setForm] = useState({ name: '', phone: '', location: '', password: '' });
+  const [form, setForm] = useState({ name: '', phone: '', location: '' });
   const [pending, setPending] = useState(null); // { phone, phoneDisplay, devCode }
   const [code, setCode] = useState('');
   const [errors, setErrors] = useState([]);
@@ -256,7 +255,8 @@ export default function RegisterForm({ next = '/account' }) {
           placeholder="+677 740 0000"
         />
         <span className="mt-2 block text-xs leading-relaxed text-bbInk/40">
-          We text a code to this number to confirm it is yours. It is also how you sign in.
+          We text a code to this number to confirm it is yours. It is also how you sign in — no
+          password to remember.
         </span>
       </label>
 
@@ -269,22 +269,6 @@ export default function RegisterForm({ next = '/account' }) {
           className="bb-input"
           placeholder="e.g. Honiara — Ranadi, or Gizo"
         />
-      </label>
-
-      <label className="block">
-        <span className="bb-label">Password</span>
-        <input
-          type="password"
-          autoComplete="new-password"
-          value={form.password}
-          onChange={field('password').onChange}
-          required
-          minLength={8}
-          className="bb-input"
-        />
-        <span className="mt-2 block text-xs leading-relaxed text-bbInk/40">
-          At least 8 characters. Something you will remember — there is no email reset yet.
-        </span>
       </label>
 
       {errors.length > 0 && (

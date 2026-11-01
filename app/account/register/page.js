@@ -8,9 +8,8 @@ import { currentCustomer } from '@/lib/current-customer';
 /**
  * CREATE ACCOUNT — /account/register
  *
- * The phone number is the handle and the password is hashed before it is stored.
- * Signing up signs her in, because there is no email to verify and nothing to
- * wait for.
+ * The phone number is the handle; a texted code proves it. Signing up signs her in,
+ * because there is no email to verify and nothing to wait for. There is no password.
  *
  * WHY AN ACCOUNT IS REQUIRED TO ORDER NOW: it is what makes her orders follow her
  * to a new phone. Before this, an invoice lived only in the browser that placed

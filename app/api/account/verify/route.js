@@ -85,7 +85,6 @@ export async function POST(request) {
     name: result.pending.name,
     location: result.pending.location,
     email: result.pending.email,
-    passwordHash: result.pending.password_hash,
   });
 
   if (!created.ok) {

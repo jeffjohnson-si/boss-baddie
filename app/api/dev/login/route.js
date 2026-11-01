@@ -1,10 +1,8 @@
-import crypto from 'node:crypto';
 import { NextResponse } from 'next/server';
 import {
   CUSTOMER_COOKIE,
   createCustomerToken,
   customerCookieOptions,
-  hashPassword,
   isSecureRequest,
 } from '@/lib/customer-auth';
 import { createCustomer } from '@/lib/customers';
@@ -54,9 +52,6 @@ export async function GET(request) {
       name: PREVIEW_NAME,
       location: 'Honiara',
       email: '',
-      // A random password she will never be told: this account exists to look at
-      // pages, not to be signed into through the real form.
-      passwordHash: hashPassword(crypto.randomBytes(24).toString('hex')),
     });
 
     if (!created.ok) {

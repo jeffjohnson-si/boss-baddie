@@ -2,7 +2,6 @@ import { redirect } from 'next/navigation';
 import Link from 'next/link';
 import BrandLogo from '@/components/BrandLogo';
 import AdminNav from '@/components/admin/AdminNav';
-import CustomerResetButton from '@/components/admin/CustomerResetButton';
 import { currentAdmin } from '@/lib/current-admin';
 import { getCommunityStats } from '@/lib/community';
 import { getCustomerTotals, readCustomersForAdmin } from '@/lib/customers';
@@ -77,11 +76,6 @@ export default async function AdminCommunityPage() {
           nowhere else; the other women only ever see each other&apos;s names.
         </p>
 
-        <p className="mt-2 max-w-2xl text-sm leading-relaxed text-bbInk/50">
-          If a customer forgets her password, reset it here and send her the temporary password
-          privately. The reset signs her out of any device still using the old password.
-        </p>
-
         <div className="mt-10">
           {customers.length === 0 ? (
             <p className="bb-prose">No accounts yet.</p>
@@ -90,7 +84,7 @@ export default async function AdminCommunityPage() {
               {customers.map((customer) => (
                 <li
                   key={customer.id}
-                  className="flex flex-col gap-3 py-4 sm:flex-row sm:items-start sm:justify-between sm:gap-6"
+                  className="flex flex-col gap-1 py-4 sm:flex-row sm:items-center sm:justify-between sm:gap-6"
                 >
                   <div className="min-w-0">
                     <p className="font-display text-base text-bbInk">{customer.name}</p>
@@ -101,13 +95,10 @@ export default async function AdminCommunityPage() {
                     </p>
                   </div>
 
-                  <div className="flex shrink-0 flex-col items-start gap-2 sm:items-end">
-                    <p className="text-xs text-bbInk/40">
-                      Joined {formatDate(customer.joinedAt)}
-                      {customer.lastLoginAt ? ` · last in ${formatDate(customer.lastLoginAt)}` : ''}
-                    </p>
-                    <CustomerResetButton customerId={customer.id} customerName={customer.name} />
-                  </div>
+                  <p className="shrink-0 text-xs text-bbInk/40">
+                    Joined {formatDate(customer.joinedAt)}
+                    {customer.lastLoginAt ? ` · last in ${formatDate(customer.lastLoginAt)}` : ''}
+                  </p>
                 </li>
               ))}
             </ul>
