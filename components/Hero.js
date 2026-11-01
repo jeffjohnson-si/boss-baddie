@@ -1,16 +1,18 @@
 import Link from 'next/link';
 import BrandLogo from '@/components/BrandLogo';
-import IllustrationPlaceholder from '@/components/IllustrationPlaceholder';
 import { SparkleField } from '@/components/Decor';
 
 /**
  * Hero — the editorial opener.
  *
- * Layout follows the approved reference:
- *   Desktop — LEFT is the brand lockup with the reserved portrait card sitting
- *             over its right edge; RIGHT is the "Become Her" headline stack
- *             with a single segmented CTA pill.
- *   Mobile  — the same blocks stacked: lockup, portrait, then the copy.
+ * Layout:
+ *   Desktop — LEFT is the brand lockup on its own; RIGHT is the "Become Her"
+ *             headline stack with a single segmented CTA pill.
+ *   Mobile  — the same blocks stacked: lockup, then the copy.
+ *
+ * There is deliberately no hero photograph. The mark and the headline carry the
+ * opening screen, which keeps the page light for slow connections and leaves
+ * the photography to the showcase row below.
  *
  * The logo is rendered ONCE and repositioned with CSS rather than duplicated
  * per breakpoint — two <Image> instances would mean two downloads, and a
@@ -24,42 +26,31 @@ export default function Hero() {
       <SparkleField density="sm" />
 
       <div className="bb-container relative grid items-center gap-10 py-10 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.05fr)] lg:gap-10 lg:py-14">
-        {/* ---------- LEFT: brand lockup + reserved portrait ---------- */}
+        {/* ---------- LEFT: brand lockup ---------- */}
         <div className="relative flex flex-col items-center lg:block">
-          {/* In flow on mobile; absolute and IN FRONT of the portrait from lg up,
-              so the tail of the "BADDIE" wordmark crosses over her card exactly
-              as in the reference. That overlap is why this instance uses the
-              alpha-cut copy of the mark (`transparent`) — the supplied
-              /logo.png has no alpha and would paint a black box over her.
+          {/* In flow on mobile; absolute from lg up. From xl the lockup is
+              centred in the left half, so the mark and the headline read as a
+              balanced pair. Between lg and xl it stays pinned to the shell's
+              left edge: a 484px lockup will not centre inside that narrower
+              column without crowding the headline.
               pointer-events-none so the transparent area cannot swallow clicks.
 
-              The calc pins the lockup 8px inside the shell's LEFT EDGE at any
-              width, which is as far left as it can go without the logo being
-              cropped — and the mark must never be cropped.
+              `w-max` is load-bearing, not decoration: without it the absolute
+              box shrink-to-fits the space from `left` to the column's right
+              edge, and the global `img { max-width: 100% }` then clamps the
+              width while the fixed height stays — which squashes the mark.
+
+              The calc pins the lockup 8px inside the shell's LEFT EDGE:
                 -32px            escapes the container's 40px padding to the shell edge
                 max(0px, ...)    adds back the shell margin that only exists once
                                  the shell is wider than the 1240px container
               1304px = 1240px container + the shell's 2×32px outer margin. */}
-          <div className="mb-8 lg:pointer-events-none lg:absolute lg:top-1/2 lg:z-20 lg:mb-0 lg:-translate-y-1/2 lg:left-[calc(-32px_-_max(0px,(100vw_-_1304px)/2))]">
+          <div className="mb-8 lg:pointer-events-none lg:absolute lg:top-1/2 lg:z-20 lg:mb-0 lg:w-max lg:left-[calc(-32px_-_max(0px,(100vw_-_1304px)/2))] lg:-translate-y-1/2 xl:left-1/2 xl:-translate-x-1/2">
             <BrandLogo
               size="2xl"
               priority
               transparent
-              className="h-[120px] w-auto drop-shadow-[0_2px_12px_rgba(0,0,0,0.55)] sm:h-[150px] lg:h-[300px]"
-            />
-          </div>
-
-          {/* Patricia's own photograph — the full-length studio portrait. The
-              frame uses the file's exact 746:1322 ratio, so the whole figure
-              shows with no crop and no letterboxing.
-              priority + cover: this is the page's largest above-the-fold image. */}
-          <div className="relative z-10 w-full max-w-[280px] sm:max-w-[320px] lg:ml-auto lg:mr-0 lg:max-w-[330px]">
-            <IllustrationPlaceholder
-              slot="hero"
-              priority
-              fit="cover"
-              sizes="(max-width: 1024px) 70vw, 24vw"
-              frameClassName="rounded-3xl"
+              className="h-[120px] w-auto sm:h-[150px] lg:h-[300px]"
             />
           </div>
         </div>

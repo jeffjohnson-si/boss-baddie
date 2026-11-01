@@ -2,13 +2,13 @@ import Image from 'next/image';
 import { Sparkle } from '@/components/Decor';
 
 /**
- * IllustrationPlaceholder — a RESERVED slot for artwork Patricia supplies
- * herself: the illustrated founder characters, and the showcase photography.
+ * IllustrationPlaceholder — a RESERVED slot for photography Patricia supplies
+ * herself: the Our Story portrait and the showcase images.
  *
- * Brand image rule: the illustrated women are supplied as fixed assets. Nothing
- * in this codebase draws or generates a person. Until the files are dropped in,
- * this renders a labelled frame at the exact final aspect ratio, so the layout
- * never shifts when the real artwork arrives.
+ * Brand image rule: every photograph of a person is a fixed asset supplied by
+ * Patricia. Nothing in this codebase draws or generates a person. Until a file
+ * is dropped in, this renders a labelled frame at the exact final aspect ratio,
+ * so the layout never shifts when the real artwork arrives.
  *
  * ---------------------------------------------------------------
  * HOW TO PLUG IN THE REAL ARTWORK
@@ -39,15 +39,6 @@ import { Sparkle } from '@/components/Decor';
  * for screen readers and for SEO the moment the image lands.
  */
 export const ILLUSTRATIONS = {
-  hero: {
-    src: '/illustrations/patricia-homepage.jpg',
-    width: 746,
-    height: 1322, // full-length portrait; the frame matches it exactly, no crop
-    alt: 'Patricia, founder of BOSS BADDIE, seated in a white suit and heels against a pale studio backdrop',
-    label: 'Founder photograph',
-    note: 'Full length · Patricia',
-    ratio: 'aspect-[746/1322]',
-  },
   story: {
     src: '/illustrations/our-story-patricia.jpg',
     width: 1240,
@@ -59,59 +50,52 @@ export const ILLUSTRATIONS = {
   },
 
   /* ---- Homepage showcase row ----
-     Five reserved slots for the lifestyle and product photography Patricia
-     supplies. Same rule as the illustrations: nothing here is generated, and
-     each slot already carries its own alt text so the row is accessible and
-     indexable the moment the files land.
-
-     `hint` is the one line shown inside an empty frame, and unlike `label` and
-     `note` it is shown in production too. It is written TO Patricia, so she can
-     see at a glance which photograph belongs where. */
+     Five slots for the photography and product graphics Patricia supplies.
+     Nothing here is generated. Each source keeps its own pixel dimensions and
+     the card crops it to 3:4 with `object-cover`, so the row stays even. */
   showcase1: {
-    src: '/illustrations/showcase-1.jpg',
-    width: 1446,
-    height: 1928, // exactly 3:4 — crop-only from the supplied square photo
-    alt: 'Hand holding a BOSS BADDIE phone case printed with pink and black florals',
-    label: 'Showcase 1',
-    note: 'Product in hand · phone case',
-    hint: 'A picture of your product',
-    ratio: 'aspect-[3/4]',
-  },
-  showcase2: {
-    src: '/illustrations/showcase-phone-cases.jpg',
-    width: 1240,
-    height: 1664,
-    alt: 'BOSS BADDIE phone cases and popsockets arranged on a white background',
-    label: 'Showcase 2',
-    note: 'Studio flat lay · phone cases',
-    hint: 'A picture of your products',
-    ratio: 'aspect-[3/4]',
-  },
-  showcase3: {
-    src: '/illustrations/showcase-phone-detail.jpg',
-    width: 750,
-    height: 1000,
-    alt: 'Close-up of pink and floral BOSS BADDIE phone cases',
-    label: 'Showcase 3',
-    note: 'Detail · phone cases and popsockets',
-    ratio: 'aspect-[3/4]',
-  },
-  showcase4: {
-    src: '/illustrations/showcase-earrings.jpg',
-    width: 1240,
-    height: 1672,
-    alt: 'BOSS BADDIE gold hibiscus earrings in a black gift box',
-    label: 'Showcase 4',
-    note: 'Product · earrings and gift box',
-    ratio: 'aspect-[3/4]',
-  },
-  showcase5: {
-    src: '/illustrations/showcase-gym-bag.jpg',
+    src: '/illustrations/showcase-bag.jpg',
     width: 1100,
     height: 1466,
     alt: 'BOSS BADDIE gym bag and water bottle',
-    label: 'Showcase 5',
+    label: 'Showcase 1',
     note: 'Lifestyle · bag and bottle',
+    ratio: 'aspect-[3/4]',
+  },
+  showcase2: {
+    src: '/illustrations/showcase-event.jpg',
+    width: 1240,
+    height: 1548,
+    alt: 'BOSS BADDIE products displayed at the Vision Board Experience — totes, planners, phone cases and makeup',
+    label: 'Showcase 2',
+    note: 'Event · Vision Board Experience',
+    ratio: 'aspect-[3/4]',
+  },
+  showcase3: {
+    src: '/illustrations/showcase-tote-bags.jpg',
+    width: 1240,
+    height: 1654,
+    alt: "BOSS BADDIE's top three tote bags: Floral, Faith and Tropical Bloom",
+    label: 'Showcase 3',
+    note: 'Product graphic · tote bags',
+    ratio: 'aspect-[3/4]',
+  },
+  showcase4: {
+    src: '/illustrations/showcase-screen-protector.jpg',
+    width: 1240,
+    height: 1684,
+    alt: 'BOSS BADDIE 9H tempered glass screen protector, its packaging and the phone models it fits',
+    label: 'Showcase 4',
+    note: 'Product graphic · screen protector',
+    ratio: 'aspect-[3/4]',
+  },
+  showcase5: {
+    src: '/illustrations/showcase-phone-cases.jpg',
+    width: 1240,
+    height: 1664,
+    alt: 'BOSS BADDIE phone cases, popsockets and wallets arranged on a white background',
+    label: 'Showcase 5',
+    note: 'Studio flat lay · phone cases',
     ratio: 'aspect-[3/4]',
   },
 };

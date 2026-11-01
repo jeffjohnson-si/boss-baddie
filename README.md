@@ -69,21 +69,20 @@ Illustrated character artwork and photography are supplied by Patricia.
 **Nothing in this repository draws a woman**, and no cartoon or anime styling is
 used anywhere.
 
-- Every slot is filled: the **hero portrait**, the **Our Story** photograph, and
-  all five **showcase** cards are real images in `public/illustrations/`
-  (`patricia-homepage.jpg`, `our-story-patricia.jpg`, `showcase-1.jpg`,
-  `showcase-phone-cases.jpg`, `showcase-phone-detail.jpg`, `showcase-earrings.jpg`,
-  `showcase-gym-bag.jpg`). No placeholder frame is shown anywhere on the site.
-  Any new slot added later renders a labelled frame at its final aspect ratio, so
-  nothing shifts when the file lands.
-- The hero and Our Story images are two different photographs: the full-length
-  studio portrait for the hero, and a close-up for the story page. The hero
-  frame uses that file's exact 746:1322 ratio, so nothing is cropped. The
-  illustrated founder artwork (`founder-hero.jpg`) is kept in the folder but is
-  no longer referenced by any page.
+- The hero carries no photograph: the brand mark and the headline hold the
+  opening screen on their own. The **Our Story** photograph and all five
+  **showcase** cards are real images in `public/illustrations/`
+  (`our-story-patricia.jpg`, `showcase-bag.jpg`, `showcase-event.jpg`,
+  `showcase-tote-bags.jpg`, `showcase-screen-protector.jpg`,
+  `showcase-phone-cases.jpg`).
+  No placeholder frame is shown anywhere on the site. Any new slot added later
+  renders a labelled frame at its final aspect ratio, so nothing shifts when the
+  file lands.
 - Photography is JPEG; PNG only where transparency is genuinely needed. The two
   supplied PNG photographs were converted to JPEG at the same pixel dimensions
-  (3 MB each → ~330 KB) because they carried no alpha channel.
+  (3 MB each → ~330 KB) because they carried no alpha channel. The illustrated
+  founder artwork (`founder-hero.jpg`) is kept in the folder but is no longer
+  referenced by any page.
 - Everything else is product mockups, graphic sparkles and abstract shapes,
   all inline SVG in `components/Decor.js` and `components/ProductArt.js`.
 
@@ -95,11 +94,11 @@ used anywhere.
 
 ```js
 export const ILLUSTRATIONS = {
-  hero: {
-    src: '/illustrations/hero-patricia.jpg',   // was null
+  story: {
+    src: '/illustrations/story-patricia.jpg',   // was null
     width: 900,
-    height: 1200,
-    alt: 'Illustrated portrait of Patricia, founder of BOSS BADDIE, standing confidently',
+    height: 900,
+    alt: 'Patricia, founder of BOSS BADDIE',
     // ...
   },
 };
@@ -154,9 +153,8 @@ The hot-pink outer frame is a CSS gradient in `app/globals.css` built around
   redrawn. Appears in the header, hero lockup and login screen.
 - **`public/logo-mark.png`** — the same artwork, same pixels, with only the flat
   near-black backdrop knocked out to transparency. It exists because the
-  supplied `logo.png` has no alpha channel, and in the hero the mark now sits
-  *in front of* the founder portrait (the tail of "BADDIE" crosses her card) —
-  an opaque file would paint a black rectangle over her. Request it with
+  supplied `logo.png` has no alpha channel: the opaque version would paint a
+  black rectangle wherever the mark sits over the shell. The hero uses it via
   `<BrandLogo transparent />`. `public/logo.png` itself stays exactly as
   supplied.
 - **Grain** — an inline SVG `feTurbulence` data URI on `body::after` in
