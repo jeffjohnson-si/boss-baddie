@@ -1,7 +1,21 @@
 import { NextResponse } from 'next/server';
 import { currentAdmin } from '@/lib/current-admin';
 import { INVOICE_STATUSES } from '@/lib/order-constants';
-import { ORDER_STATUSES, setInvoiceStatus, setOrderPickup, updateOrderStatus } from '@/lib/orders';
+import { ORDER_STATUSES, OutOfStockError, setInvoiceStatus, setOrderPickup, updateOrderStatus } from '@/lib/orders';
+
+/**
+ * Turn a shortage into a sentence Patricia can act on. Reopening an order asks
+ * the store to hold its units again, which fails when they have since sold.
+ */
+function stockShortfall(err) {
+  return err.unavailable
+    .map(({ title, available }) =>
+      available > 0
+        ? `Only ${available} × ${title} left, so this order cannot be reopened.`
+        : `${title} is out of stock, so this order cannot be reopened.`,
+    )
+    .join(' ');
+}
 
 /**
  * PATCH /api/admin/orders/:id — move an order along the workflow, or record
@@ -83,6 +97,13 @@ export async function PATCH(request, { params }) {
     try {
       updated = await setInvoiceStatus(id, invoice);
     } catch (err) {
+      // Un-voiding holds the units again; they may have been sold since.
+      if (err instanceof OutOfStockError) {
+        return NextResponse.json(
+          { ok: false, error: stockShortfall(err) },
+          { status: 409 },
+        );
+      }
       console.error('[api/admin/orders/:id] failed to save invoice status:', err);
       return NextResponse.json(
         { ok: false, error: 'Could not save the invoice status. Please try again.' },
@@ -108,6 +129,13 @@ export async function PATCH(request, { params }) {
   try {
     updated = await updateOrderStatus(id, status);
   } catch (err) {
+    // Reopening a cancelled order holds its units again; they may be gone.
+    if (err instanceof OutOfStockError) {
+      return NextResponse.json(
+        { ok: false, error: stockShortfall(err) },
+        { status: 409 },
+      );
+    }
     console.error('[api/admin/orders/:id] failed to save order status:', err);
     return NextResponse.json(
       { ok: false, error: 'Could not save the order status. Please try again.' },

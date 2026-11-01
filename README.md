@@ -268,11 +268,16 @@ Where the data lives:
 
 Two behaviours worth knowing:
 
-- **Stock is checked on the server.** A submitted order cannot include a sold-out
-  product or request more units than its current stock, including when the same
-  product appears on multiple lines. Orders are requests that Patricia confirms
-  by hand; this check does not reserve or decrement stock, so she should confirm
-  availability before accepting an order.
+- **Stock is held by the order.** A submitted order cannot include a sold-out
+  product or request more units than are left, including when the same product
+  appears on multiple lines. The units are taken in the same transaction that
+  writes the order — `UPDATE products SET stock = stock - $2 WHERE stock >= $2`
+  — so two customers cannot both buy the last one: the second gets a `422`
+  naming the product. Cancelling the order, or voiding its invoice, puts the
+  units back; moving it back into the workflow reserves them again, and fails
+  with `409` if they have been sold in the meantime. `orders.stock_released`
+  records which side of that line the order is on, so each transition moves
+  stock exactly once.
 - **Hide first, delete second.** "Hide" sets `archived: true`. The product leaves
   the shop and the bag but the record is kept, so it can be put back. Under
   **Hidden from the shop** each one also offers **Delete for good**, which really

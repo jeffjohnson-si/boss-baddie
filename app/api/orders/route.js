@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { buildOrder, insertOrder, invoicePath } from '@/lib/orders';
+import { buildOrder, insertOrder, invoicePath, OutOfStockError } from '@/lib/orders';
 import { currentCustomer } from '@/lib/current-customer';
 import { clientKey, hit } from '@/lib/rate-limit';
 
@@ -86,6 +86,22 @@ export async function POST(request) {
     );
 
   } catch (err) {
+    // Stock ran out between validation and the write, or another order took the
+    // last unit at the same moment. Explain it against the line that changed.
+    if (err instanceof OutOfStockError) {
+      return NextResponse.json(
+        {
+          ok: false,
+          errors: err.unavailable.map(({ title, available }) =>
+            available > 0
+              ? `Only ${available} × ${title} left. Please update your bag.`
+              : `${title} just sold out. Please remove it from your bag.`,
+          ),
+        },
+        { status: 422 },
+      );
+    }
+
     console.error('[api/orders] failed to save order:', err);
     return NextResponse.json(
       {
