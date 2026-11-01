@@ -71,11 +71,15 @@ used anywhere.
 
 - Every slot is filled: the **hero portrait**, the **Our Story** photograph, and
   all five **showcase** cards are real images in `public/illustrations/`
-  (`founder-hero.jpg`, `our-story-patricia.jpg`, `showcase-1.jpg`,
+  (`patricia-hero.jpg`, `our-story-patricia.jpg`, `showcase-1.jpg`,
   `showcase-phone-cases.jpg`, `showcase-phone-detail.jpg`, `showcase-earrings.jpg`,
   `showcase-gym-bag.jpg`). No placeholder frame is shown anywhere on the site.
   Any new slot added later renders a labelled frame at its final aspect ratio, so
   nothing shifts when the file lands.
+- The hero and Our Story images are the same photograph at two crops: a 3:4
+  portrait for the hero and a square for the story page. The illustrated
+  founder artwork (`founder-hero.jpg`) is kept in the folder but is no longer
+  referenced by any page.
 - Photography is JPEG; PNG only where transparency is genuinely needed. The two
   supplied PNG photographs were converted to JPEG at the same pixel dimensions
   (3 MB each → ~330 KB) because they carried no alpha channel.

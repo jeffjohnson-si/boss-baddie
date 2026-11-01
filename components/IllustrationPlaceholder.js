@@ -40,11 +40,11 @@ import { Sparkle } from '@/components/Decor';
  */
 export const ILLUSTRATIONS = {
   hero: {
-    src: '/illustrations/founder-hero.jpg',
-    width: 1605,
-    height: 2140, // exactly 3:4, so it fills the reserved frame with no crop
-    alt: 'Illustrated portrait of Patricia, founder of BOSS BADDIE, in a pink blazer resting her chin on her hand',
-    label: 'Founder illustration',
+    src: '/illustrations/patricia-hero.jpg',
+    width: 1240,
+    height: 1644, // 3:4 portrait — the hero frame trims under 1% of the width
+    alt: 'Patricia, founder of BOSS BADDIE, in a white halter top and gold hibiscus earrings',
+    label: 'Founder photograph',
     note: 'Portrait · Patricia',
     ratio: 'aspect-[3/4]',
   },

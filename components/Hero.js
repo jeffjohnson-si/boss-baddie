@@ -49,8 +49,8 @@ export default function Hero() {
             />
           </div>
 
-          {/* Patricia's uploaded artwork. 1605x2140 is exactly 3:4, the ratio the
-              slot was reserved at, so it drops in with no crop and no shift.
+          {/* Patricia's own photograph. 1240x1644 is within 1% of the 3:4 frame,
+              so `cover` trims a hair off each side and nothing else moves.
               priority + cover: this is the page's largest above-the-fold image. */}
           <div className="relative z-10 w-full max-w-[280px] sm:max-w-[320px] lg:ml-auto lg:mr-0 lg:max-w-[330px]">
             <IllustrationPlaceholder
