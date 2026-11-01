@@ -12,8 +12,9 @@ import { Sparkle } from '@/components/Decor';
  *
  * ---------------------------------------------------------------
  * HOW TO PLUG IN THE REAL ARTWORK
- *   1. Save the file to  public/illustrations/<name>.png   (PNG or WebP,
- *      transparent background, at least 900px on the long edge)
+ *   1. Save the file to  public/illustrations/<name>.jpg  — JPEG for
+ *      photography, PNG only for illustration that needs a transparent
+ *      background. At least 900px on the long edge.
  *   2. Set `src` on the matching slot in ILLUSTRATIONS below, and correct
  *      width/height to the real pixel dimensions
  *   3. Nothing else changes — every usage picks it up automatically
@@ -39,22 +40,21 @@ import { Sparkle } from '@/components/Decor';
  */
 export const ILLUSTRATIONS = {
   hero: {
-    src: '/illustrations/founder-hero.png',
+    src: '/illustrations/founder-hero.jpg',
     width: 1605,
     height: 2140, // exactly 3:4, so it fills the reserved frame with no crop
     alt: 'Illustrated portrait of Patricia, founder of BOSS BADDIE, in a pink blazer resting her chin on her hand',
     label: 'Founder illustration',
-    note: 'Portrait · reserved for your uploaded hero artwork',
+    note: 'Portrait · Patricia',
     ratio: 'aspect-[3/4]',
   },
   story: {
-    src: null, // e.g. '/illustrations/founder-story.png'
-    width: 1000,
-    height: 1000,
-    alt: 'Illustrated portrait of Patricia at work on the BOSS BADDIE brand',
-    label: 'Our Story illustration',
-    note: 'Square · reserved for your uploaded About Us artwork',
-    hint: 'A picture of Patricia goes here',
+    src: '/illustrations/our-story-patricia.jpg',
+    width: 1240,
+    height: 1240,
+    alt: 'Patricia, founder of BOSS BADDIE, wearing gold hibiscus earrings',
+    label: 'Our Story photograph',
+    note: 'Square · Patricia',
     ratio: 'aspect-square',
   },
 
@@ -68,7 +68,7 @@ export const ILLUSTRATIONS = {
      `note` it is shown in production too. It is written TO Patricia, so she can
      see at a glance which photograph belongs where. */
   showcase1: {
-    src: '/illustrations/showcase-1.png',
+    src: '/illustrations/showcase-1.jpg',
     width: 1446,
     height: 1928, // exactly 3:4 — crop-only from the supplied square photo
     alt: 'Hand holding a BOSS BADDIE phone case printed with pink and black florals',
@@ -78,43 +78,40 @@ export const ILLUSTRATIONS = {
     ratio: 'aspect-[3/4]',
   },
   showcase2: {
-    src: null,
-    width: 900,
-    height: 1200,
-    alt: 'Custom BOSS BADDIE phone case shown beside the customer who ordered it',
+    src: '/illustrations/showcase-phone-cases.jpg',
+    width: 1240,
+    height: 1664,
+    alt: 'BOSS BADDIE phone cases and popsockets arranged on a white background',
     label: 'Showcase 2',
-    note: 'Custom order · case and customer',
-    hint: 'A picture of a customer with her order',
-    ratio: 'aspect-[3/4]',
-  },
-  showcase3: {
-    src: null,
-    width: 900,
-    height: 1200,
-    alt: 'BOSS BADDIE case and tempered glass on a plain studio background',
-    label: 'Showcase 3',
-    note: 'Studio flat lay · case and glass',
+    note: 'Studio flat lay · phone cases',
     hint: 'A picture of your products',
     ratio: 'aspect-[3/4]',
   },
+  showcase3: {
+    src: '/illustrations/showcase-phone-detail.jpg',
+    width: 750,
+    height: 1000,
+    alt: 'Close-up of pink and floral BOSS BADDIE phone cases',
+    label: 'Showcase 3',
+    note: 'Detail · phone cases and popsockets',
+    ratio: 'aspect-[3/4]',
+  },
   showcase4: {
-    src: null,
-    width: 900,
-    height: 1200,
-    alt: 'Solomon Islands woman working on her small business',
+    src: '/illustrations/showcase-earrings.jpg',
+    width: 1240,
+    height: 1672,
+    alt: 'BOSS BADDIE gold hibiscus earrings in a black gift box',
     label: 'Showcase 4',
-    note: 'Lifestyle · woman at work',
-    hint: 'A picture of yourself at work',
+    note: 'Product · earrings and gift box',
     ratio: 'aspect-[3/4]',
   },
   showcase5: {
-    src: null,
-    width: 900,
-    height: 1200,
-    alt: 'BOSS BADDIE lifestyle accessories styled together',
+    src: '/illustrations/showcase-gym-bag.jpg',
+    width: 1100,
+    height: 1466,
+    alt: 'BOSS BADDIE gym bag and water bottle',
     label: 'Showcase 5',
-    note: 'Lifestyle · styled accessories',
-    hint: 'A picture of your brand',
+    note: 'Lifestyle · bag and bottle',
     ratio: 'aspect-[3/4]',
   },
 };

@@ -69,24 +69,29 @@ Illustrated character artwork and photography are supplied by Patricia.
 **Nothing in this repository draws a woman**, and no cartoon or anime styling is
 used anywhere.
 
-- Reserved slots: the **hero portrait**, the **Our Story** illustration, and the
-  five **showcase** cards on the homepage. Filled so far: the hero portrait
-  (`public/illustrations/founder-hero.png`) and showcase 1
-  (`public/illustrations/showcase-1.png`). The rest still render labelled frames
-  at their final aspect ratio, so nothing shifts when the files land.
+- Every slot is filled: the **hero portrait**, the **Our Story** photograph, and
+  all five **showcase** cards are real images in `public/illustrations/`
+  (`founder-hero.jpg`, `our-story-patricia.jpg`, `showcase-1.jpg`,
+  `showcase-phone-cases.jpg`, `showcase-phone-detail.jpg`, `showcase-earrings.jpg`,
+  `showcase-gym-bag.jpg`). No placeholder frame is shown anywhere on the site.
+  Any new slot added later renders a labelled frame at its final aspect ratio, so
+  nothing shifts when the file lands.
+- Photography is JPEG; PNG only where transparency is genuinely needed. The two
+  supplied PNG photographs were converted to JPEG at the same pixel dimensions
+  (3 MB each → ~330 KB) because they carried no alpha channel.
 - Everything else is product mockups, graphic sparkles and abstract shapes,
   all inline SVG in `components/Decor.js` and `components/ProductArt.js`.
 
 #### Dropping in your illustrations
 
-1. Save the file into `public/illustrations/`, e.g.
-   `public/illustrations/hero-patricia.png`.
+1. Save the file into `public/illustrations/` — JPEG for photography, PNG only
+   for artwork with a transparent background, at least 900 px on the long edge.
 2. Open `components/IllustrationPlaceholder.js` and set `src` on that slot:
 
 ```js
 export const ILLUSTRATIONS = {
   hero: {
-    src: '/illustrations/hero-patricia.png',   // was null
+    src: '/illustrations/hero-patricia.jpg',   // was null
     width: 900,
     height: 1200,
     alt: 'Illustrated portrait of Patricia, founder of BOSS BADDIE, standing confidently',
