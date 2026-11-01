@@ -40,13 +40,13 @@ import { Sparkle } from '@/components/Decor';
  */
 export const ILLUSTRATIONS = {
   hero: {
-    src: '/illustrations/patricia-hero.jpg',
-    width: 1240,
-    height: 1644, // 3:4 portrait — the hero frame trims under 1% of the width
-    alt: 'Patricia, founder of BOSS BADDIE, in a white halter top and gold hibiscus earrings',
+    src: '/illustrations/patricia-homepage.jpg',
+    width: 746,
+    height: 1322, // full-length portrait; the frame matches it exactly, no crop
+    alt: 'Patricia, founder of BOSS BADDIE, seated in a white suit and heels against a pale studio backdrop',
     label: 'Founder photograph',
-    note: 'Portrait · Patricia',
-    ratio: 'aspect-[3/4]',
+    note: 'Full length · Patricia',
+    ratio: 'aspect-[746/1322]',
   },
   story: {
     src: '/illustrations/our-story-patricia.jpg',

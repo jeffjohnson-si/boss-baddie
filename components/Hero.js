@@ -45,12 +45,13 @@ export default function Hero() {
               size="2xl"
               priority
               transparent
-              className="h-[120px] w-auto sm:h-[150px] lg:h-[300px]"
+              className="h-[120px] w-auto drop-shadow-[0_2px_12px_rgba(0,0,0,0.55)] sm:h-[150px] lg:h-[300px]"
             />
           </div>
 
-          {/* Patricia's own photograph. 1240x1644 is within 1% of the 3:4 frame,
-              so `cover` trims a hair off each side and nothing else moves.
+          {/* Patricia's own photograph — the full-length studio portrait. The
+              frame uses the file's exact 746:1322 ratio, so the whole figure
+              shows with no crop and no letterboxing.
               priority + cover: this is the page's largest above-the-fold image. */}
           <div className="relative z-10 w-full max-w-[280px] sm:max-w-[320px] lg:ml-auto lg:mr-0 lg:max-w-[330px]">
             <IllustrationPlaceholder
