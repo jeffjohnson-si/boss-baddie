@@ -54,9 +54,9 @@ export default function OurStoryPage() {
         <FloralOverlay corners="left" />
 
         <div className="bb-container relative grid items-center gap-12 lg:grid-cols-2 lg:gap-16">
-          {/* RESERVED for the uploaded About Us picture. Until it lands the frame
-              carries the line "A picture of Patricia goes here", so the space is
-              obviously waiting for something rather than looking broken. */}
+          {/* Patricia's portrait. The file and its alt text live in the slot
+              registry (components/IllustrationPlaceholder.js), so replacing it
+              is a one-line change there. */}
           <div className="mx-auto w-full max-w-md lg:mx-0">
             <IllustrationPlaceholder slot="story" sizes="(max-width: 1024px) 88vw, 44vw" frameClassName="w-full" />
           </div>
