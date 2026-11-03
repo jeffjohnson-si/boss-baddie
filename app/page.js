@@ -11,9 +11,8 @@ import ShowcaseRow from '@/components/ShowcaseRow';
  *   3. ShowcaseRow  — five reserved slots for uploaded photography
  *   4. Tagline band — "Empowered women empower women."
  *
- * The mantra block and the community testimonials deliberately live on
- * /community rather than here; the homepage stays a single screen so nothing
- * competes with the hero.
+ * The mantra block lives on /our-story rather than here; the homepage stays a
+ * single screen so nothing competes with the hero.
  *
  * Every block is a server component, so the homepage ships almost no
  * JavaScript — only the header's menu state is client-side.

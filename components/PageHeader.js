@@ -3,9 +3,8 @@ import { SparkleField, FloralOverlay } from '@/components/Decor';
 /**
  * PageHeader — the shared banner for inner pages.
  *
- * Keeps spacing, type scale and atmosphere identical across Our Story, Shop,
- * Community and Contact, so the site reads as one magazine rather than
- * separate templates.
+ * Keeps spacing, type scale and atmosphere identical across Our Story, Shop and
+ * Contact, so the site reads as one magazine rather than separate templates.
  *
  * @param {{
  *   eyebrow?: string,

@@ -27,7 +27,6 @@ const NAV_LINKS = [
   { href: '/', label: 'Home' },
   { href: '/our-story', label: 'About Us' },
   { href: '/shop', label: 'Shop' },
-  { href: '/community', label: 'Community' },
   { href: '/contact', label: 'Contact' },
 ];
 

@@ -16,7 +16,6 @@ const QUICK_LINKS = [
   { href: '/our-story', label: 'About Us' },
   { href: '/shop', label: 'Shop' },
   { href: '/shop/invoices', label: 'My Invoices' },
-  { href: '/community', label: 'Community' },
   { href: '/contact', label: 'Contact' },
 ];
 

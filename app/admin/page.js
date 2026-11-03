@@ -3,8 +3,6 @@ import Link from 'next/link';
 import BrandLogo from '@/components/BrandLogo';
 import AdminNav from '@/components/admin/AdminNav';
 import { currentAdmin } from '@/lib/current-admin';
-import { getCommunityStats } from '@/lib/community';
-import { getCustomerTotals } from '@/lib/customers';
 import {
   getIncomeSummary,
   getMonthlyIncome,
@@ -50,14 +48,12 @@ export default async function AdminDashboardPage() {
   const orders = await readOrders();
   const orderStats = await getOrderStats();
   const productStats = await getProductStats();
-  const accountTotals = await getCustomerTotals();
 
   const [income, monthlyIncome, recentPayments] = await Promise.all([
     getIncomeSummary(),
     getMonthlyIncome(6),
     getRecentPayments(5),
   ]);
-  const roomStats = await getCommunityStats();
 
   // Orders with no collection details yet. Each one is a customer who has been
   // promised an invoice and cannot see it until Patricia acts.
@@ -183,7 +179,7 @@ export default async function AdminDashboardPage() {
         </section>
 
         {/* ---- One card per section ---- */}
-        <div className="mt-12 grid gap-4 sm:gap-5 lg:grid-cols-3">
+        <div className="mt-12 grid gap-4 sm:gap-5 lg:grid-cols-2">
           <SectionCard
             href="/admin/orders"
             title="Orders"
@@ -205,18 +201,6 @@ export default async function AdminDashboardPage() {
             lines={[
               `${productStats.soldOut} sold out`,
               `${productStats.archived} hidden`,
-            ]}
-          />
-
-          <SectionCard
-            href="/admin/community"
-            title="Community"
-            headline={accountTotals.total}
-            headlineLabel={`account${accountTotals.total === 1 ? '' : 's'}`}
-            lines={[
-              `${roomStats.messages} message${roomStats.messages === 1 ? '' : 's'}`,
-              `${roomStats.pinned} pinned`,
-              `${accountTotals.thisMonth} joined this month`,
             ]}
           />
         </div>

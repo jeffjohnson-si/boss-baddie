@@ -175,19 +175,13 @@ app/
   invoice/[token]/     the customer's own invoice — private link, no login
   invoices/            every invoice this browser has been given — no login either
 
-  our-story/           founder story, uses the reserved "story" illustration slot
-  community/           public page — what the sisterhood does
-  community/join/      retired — redirects to /account/register
-  community/inside/    "The Baddies Corner" — the chat (account-gated)
-  community/setup/     one-off community profile: name and picture
-  community/profile/   retired — redirects to /account/profile
+  our-story/           founder story, uses the "story" photograph slot
   contact/
   account/             her orders, invoices and saved details (phone login)
   account/login/  account/register/  account/profile/
   offline/             what the service worker shows when the network is gone
   admin/               order dashboard (auth-gated)
   admin/products/      catalogue editor (auth-gated)
-  admin/community/     members + moderation (auth-gated)
   admin/login/
   api/account/register/   POST — start a sign-up: text a verification code
   api/account/verify/     POST — check the code, create the account, sign in
@@ -197,17 +191,12 @@ app/
   api/account/session/    DELETE sign out
   api/account/profile/    PATCH name / location / contact email
   api/orders/          POST — create an order (signed-in customers only)
-  api/community/messages/  GET new messages (?after=<id>), POST send one
-  api/community/profile/   POST her community name and picture
   api/admin/session/   POST login, DELETE logout
   api/admin/orders/[id]/    PATCH status or pickup details
   api/admin/products/       POST create
   api/admin/products/[id]/  PATCH edit or restore, DELETE archive (?permanent=1 really deletes)
   api/admin/uploads/        POST product photo
-  api/admin/community/members/[id]/   PATCH remove or reinstate a member
-  api/admin/community/messages/[id]/  PATCH pin or unpin, DELETE a message
-components/            UI; components/admin/ is the dashboard,
-                       components/community/ is the members' area
+components/            UI; components/admin/ is the dashboard
 lib/
   products.js          catalogue vocabulary and pure helpers — browser safe
   product-store.js     live catalogue — SERVER ONLY, Postgres
@@ -215,24 +204,19 @@ lib/
   order-constants.js   status list + payment methods — safe for the browser
   my-invoices.js       the browser's own invoice list — safe for the browser
   auth.js              admin session signing and verification
-  community-auth.js    owner password hashing + legacy member session — SERVER ONLY
+  passwords.js         owner password hashing (scrypt) — SERVER ONLY
   customer-auth.js     shop session token (passwordless) — SERVER ONLY
   customers.js         customer store: register, phone lookup, profile — SERVER ONLY
   current-customer.js  "who is signed in to the shop", for pages and routes
   verification.js      sign-up codes: generate, hash, expire, attempt limit
   login-verification.js  login codes: generate, hash, expire, attempt limit
   sms.js               the SMS transport (console in dev, Twilio in production)
-
-  community.js         chat messages — SERVER ONLY, Postgres
-  current-member.js    "who is signed in", for pages and route handlers
   uploads.js           image upload rules, shared by both upload routes — SERVER ONLY
 db/schema.sql          PostgreSQL DDL — the database is the store
 mockups/               the three static design mockups
 ```
 
-The community testimonials live on `/community`, not the
-homepage: the homepage is deliberately a single screen so nothing competes with
-the hero.
+The homepage is deliberately a single screen so nothing competes with the hero.
 
 `lib/orders.js` and `lib/product-store.js` both import the Postgres pool, so
 client components must take their constants from the browser-safe modules instead:
@@ -418,73 +402,27 @@ The account pages and every account route take the customer from the cookie — 
 is no id in a URL or a body to tamper with, and `readOrdersForCustomer()` filters
 on `customer_id` alone.
 
-A shop account is also the community account: the same `customers` row signs in
-to the shop, the account pages and The Baddies Corner.
+## The community (removed for v1)
 
-## The community
+The site shipped with a members' room — `/community`, a one-off display name and
+picture, a polled chat, and moderation under `/admin/community`. **It is not part
+of version 1.** All of it was removed: the pages, the API routes, `lib/community.js`,
+`lib/current-member.js`, the `components/community/` tree, and the nav entries in
+the header, footer and admin bar.
 
-`/community` explains what the sisterhood does. There is **no separate
-membership and no join form**: the shop account is the community account.
-Registering with a phone number and confirming the texted code is what opens the
-room, and the same sign-in works in the shop, the account pages and the chat.
+Two things were deliberately left behind:
 
-`/community/join` survives only as a redirect to
-`/account/register?next=/community/inside`, so old links and WhatsApp messages
-still go somewhere useful. `/community/profile` redirects to `/account/profile`.
+- The **database tables** (`members`, `community_messages`) and migrations
+  `004_community_profile.sql` and `006_community_seed.sql` are still applied, with
+  their data. Dropping tables is destructive and can be done later if the room is
+  never coming back.
+- The `customers.community_name`, `avatar` and `community_profile_set_at` columns
+  still exist for the same reason; nothing reads them now.
 
-`/community/inside` is **The Baddies Corner**: one room, everyone in the same
-conversation, newest message at the bottom. It is gated in the server component
-before a single message is read, and gated again in the messages endpoint. Signed
-out, she is sent to `/account/login?next=/community/inside` and brought straight
-back after signing in.
+Reinstating the room means restoring those files from git history and re-adding the
+nav entries — the data is still there.
 
-### The one-off community profile
 
-An account carries a name and a phone number, and registering is what opens the
-community. The room asks for one more thing the first time she walks in, at
-`/community/setup`:
-
-- **The name the room sees.** Prefilled with her account name, because most
-  women keep it; replaceable with a business name or a nickname.
-- **A picture (optional).** PNG / JPEG / WebP, 2 MB, validated by magic bytes and
-  stored under a name the server generates — the same rules as product photos.
-
-Her **phone number is not asked for again**. It was set when she registered and it
-is the login handle, but it is **not shown to the room** — contact details stay
-between her and Patricia. Until this step is done the room redirects
-her here; once done it never asks again.
-
-There is no websocket. The opening screenful is server-rendered, then the browser
-asks `GET /api/community/messages?after=<last id>` on a 10-second timer and gets
-back only what is new — a few hundred bytes on a quiet day. Polling pauses while
-the tab is hidden and catches up in one request when she returns.
-
-How the privacy works:
-
-- Messages store a **copy** of the author's display name, so rendering the chat
-  never loads anyone's phone number or email.
-- The member list beside the room comes from `readCustomersForRoom()`, which
-  selects a community name, a picture and a join date — no phone number and no
-  email. Those stay between her and Patricia on `/admin/community`.
-- Patricia is in the room on her **admin session**; she has no customer row, and
-  `currentRoomViewer()` accepts either identity so she can read her own community.
-
-### Moderation
-
-Patricia reads, replies, pins and deletes in the room itself: pinned messages
-render in a gold strip above the conversation, and every poll returns the pinned
-list so a pin appears in tabs that are already open. Deleting a message is
-permanent — the point of removing abuse is that it stops being readable.
-
-`/admin/community` lists the accounts (name, phone, village, email, join date)
-and links into the room. There is deliberately no approve or remove step:
-registering is the only requirement, so a woman cannot end up able to shop but
-unable to read the room.
-
-Two opening messages from Patricia are seeded once by
-`db/migrations/006_community_seed.sql` so the first account does not walk into
-silence — the welcome one starts pinned. Delete them once the room is busy. The
-room is `community_messages` in Postgres, read and written by `lib/community.js`.
 ## The owner account
 
 The first account is created once at `/admin/register` while `admin_users` is
@@ -678,14 +616,14 @@ Everything except uploaded images lives in PostgreSQL:
 | --- | --- |
 | `products` | Patricia's catalogue |
 | `orders`, `order_items` | every order and its lines |
-| `customers` | shop and community accounts |
+| `customers` | shop accounts |
 | `signup_verifications` | pending phone sign-ups |
-| `community_messages` | The Baddies Corner |
+| `customer_login_codes` | passwordless sign-in codes |
 | `admin_users` | the owner account and hashed password |
 | `admin_recovery_emails` | verified addresses that may receive reset links |
 | `admin_password_resets` | single-use reset-link hashes |
 | `schema_migrations` | which SQL files have been applied |
-| `members` | legacy/unused; see `db/schema.sql` |
+| `members`, `community_messages` | unused since v1; the members' room was removed |
 
 Uploaded photos go to `public/uploads/` locally and to Cloudinary in production.
 
@@ -723,10 +661,6 @@ Schema notes worth knowing before you touch it:
 - **Every primary key is `TEXT`, not `UUID`.** The app generates prefixed ids
   (`ord_<uuid>`, `mem_<uuid>`, `msg_<uuid>`), so a `UUID` column would reject
   every row it writes.
-- `community_messages.author_id` is `TEXT` with **no foreign key** to `members`.
-  Patricia's own messages carry `author_id = 'owner'` and she has no member row —
-  she never signed up — so a foreign key would reject every message the founder
-  posts.
 - `order_status`, `fulfilment_method` and `payment_method` are Postgres enums
   mirroring `lib/order-constants.js`. `fulfilment_method` and `payment_method`
   have exactly one value each, `pickup` and `cash_on_pickup` — the database is
@@ -817,7 +751,7 @@ alive across deploys.
 
 ### Post-deploy checklist
 
-- [ ] Homepage, `/shop`, `/our-story`, `/community`, `/contact` all load
+- [ ] Homepage, `/shop`, `/our-story`, `/contact` all load
 - [ ] The owner account is created at `/admin/register`, and the old
       `ADMIN_EMAIL` / `ADMIN_PASSWORD` pair no longer signs in
 - [ ] `/admin/forgot` delivers a Brevo email, and the link sets a new password once
@@ -841,16 +775,6 @@ alive across deploys.
       served from the cache
 - [ ] `/shop?category=phone` filters, and the filtered URL is shareable
 - [ ] Clicking a shop card opens `/shop/<id>` with its photos and details
-- [ ] A brand-new account lands in `/community/inside` straight after the code is
-      confirmed — no second registration
-- [ ] `/community/inside` sends a signed-out visitor to sign in, then back to the room
-- [ ] A newly verified account is asked for a community name and picture once, then
-      lands in the room
-- [ ] A message from one member shows up for another, and Patricia can delete it
-- [ ] Pinning a message from `/admin/community` puts it in the strip above the chat
-- [ ] A member can upload a profile picture at `/community/profile` and it shows
-      on her messages and in the member list
-- [ ] Tapping a name in the chat or the member list opens her profile card
 - [ ] Add to bag survives a page reload (`localStorage`)
 - [ ] A test order appears in `/admin` with the correct total
 - [ ] `/admin` redirects to `/admin/login` when signed out
@@ -980,12 +904,6 @@ Already in place:
 - Order prices are **always** re-read from the catalogue server-side; whatever
   the browser claims a price is gets discarded. Quantities are clamped to 1–25.
 - Admin pages set `robots: { index: false }`.
-- The community uses the same passwordless customer session. `/community/inside`
-  redirects before it reads a single message.
-- Both community write paths take the author from the session cookie, never from
-  the request body, so nobody can send a message under someone else's name. The
-  same holds for profiles: there is no member id in any profile URL or payload, so
-  a member can only ever edit herself.
 
 Not yet, and worth doing before scale:
 
@@ -1005,15 +923,14 @@ Not yet, and worth doing before scale:
 - **Production SMS.** Passwordless sign-in needs a real SMS provider. `console`
   only prints codes to the server log and is development-only.
 - **Per-user accounts and an audit trail** once more than one person has access.
-- **CSRF tokens** on the admin and community mutation routes. Same-site cookies
-  cover the common case, not every case.
+- **CSRF tokens** on the admin mutation routes. Same-site cookies cover the common
+  case, not every case.
 - **Session revocation.** A customer row is re-read on every request, so deleting
   it blocks her immediately. Rotating `CUSTOMER_SESSION_SECRET` signs every account
   out at once.
 
 Rotate `ADMIN_SESSION_SECRET` to invalidate every admin session, and
-`CUSTOMER_SESSION_SECRET` to sign every account — and every community session —
-out.
+`CUSTOMER_SESSION_SECRET` to sign every customer out.
 
 ---
 
