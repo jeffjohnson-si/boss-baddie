@@ -9,8 +9,9 @@ import ServiceWorkerRegister from '@/components/ServiceWorkerRegister';
 import { CartProvider } from '@/components/CartProvider';
 import { FrondLine, HibiscusLine } from '@/components/Decor';
 import { currentAdmin } from '@/lib/current-admin';
-import { readActiveProducts } from '@/lib/product-store';
-import { currentCustomer } from '@/lib/current-customer';
+import { readCartCatalogue } from '@/lib/product-store';
+import { cookies } from 'next/headers';
+import { CUSTOMER_COOKIE } from '@/lib/customer-auth';
 
 
 /**
@@ -119,14 +120,11 @@ export const dynamic = 'force-dynamic';
 
 
 export default async function RootLayout({ children }) {
-  // Only the fields the bag actually renders, so the catalogue does not travel
-  // with every page as a wall of marketing copy.
-  //   title, price  -> the line item and its total
-  //   images        -> the thumbnail. Only the first photo is sent, since the bag
-  //                    shows one. A product with no photo gets the placeholder
-  //                    tile, which needs nothing passed to it.
-  const products = await readActiveProducts();
-  const catalogue = products.map(({ id, title, price, images }) => ({
+  // Only the fields the bag renders, cached across requests: the bag needs the
+  // catalogue on every page, but re-reading the table on every navigation cost a
+  // database round trip for a list that changes a few times a month. See
+  // readCartCatalogue() — admin edits invalidate it.
+  const catalogue = (await readCartCatalogue()).map(({ id, title, price, images }) => ({
     id,
     title,
     price,
@@ -137,8 +135,13 @@ export default async function RootLayout({ children }) {
   // is signed in, because a client component cannot be trusted with that.
   const isAdmin = Boolean(await currentAdmin());
 
-  // Same rule for the shop: the header shows her name because the server said so.
-  const customer = await currentCustomer();
+
+  // The header only needs a yes/no to choose between "Account" and "Sign In", so
+  // it reads the cookie rather than the customer row. Every account page and
+  // route still verifies the session against the database before showing or
+  // returning anything — this is a label, not an authorisation decision. It saves
+  // one query on every navigation.
+  const signedIn = Boolean((await cookies()).get(CUSTOMER_COOKIE)?.value);
 
   return (
     // data-scroll-behavior tells Next.js this page opts into the smooth scrolling
@@ -167,7 +170,7 @@ export default async function RootLayout({ children }) {
               footer is still reachable when the bar is on screen. */}
           <div className="bb-shell pb-[68px] lg:pb-0">
             <AdminBar active={isAdmin} />
-            <Header signedIn={Boolean(customer)} />
+            <Header signedIn={signedIn} />
 
             {/* relative + z-10 keeps content above the fixed grain overlay */}
             <main id="main" className="relative z-10">
@@ -182,7 +185,7 @@ export default async function RootLayout({ children }) {
             signed-in customer — it slides her 400-day cookie forward once a day. */}
         <BottomNav />
         <InstallBanner />
-        {customer && <SessionKeeper />}
+        {signedIn && <SessionKeeper />}
         <ServiceWorkerRegister />
       </body>
     </html>

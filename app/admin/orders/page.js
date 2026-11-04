@@ -29,11 +29,8 @@ export default async function AdminOrdersPage() {
     redirect('/admin/login');
   }
 
-  // Sequential, not Promise.all: getOrderStats() reads the same store, and on a
-  // cold start two parallel readers would both initialise it and both write it
-  // back. One read first, then the counters off the warm store.
-  const orders = await readOrders();
-  const stats = await getOrderStats();
+  // Two independent reads, so they go out together rather than back to back.
+  const [orders, stats] = await Promise.all([readOrders(), getOrderStats()]);
 
   return (
     <section className="bb-section !pt-10">

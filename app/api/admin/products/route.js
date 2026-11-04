@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { revalidateTag } from 'next/cache';
 import { currentAdmin } from '@/lib/current-admin';
 import { buildProduct, insertProduct, readProducts } from '@/lib/product-store';
 
@@ -39,6 +40,8 @@ export async function POST(request) {
 
   try {
     const product = await insertProduct(result.product);
+    // The bag's catalogue is cached across requests; a new product must appear.
+    revalidateTag('products');
     return NextResponse.json({ ok: true, product }, { status: 201 });
   } catch (err) {
     console.error('[api/admin/products] failed to save product:', err);

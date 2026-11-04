@@ -30,11 +30,18 @@ export const metadata = {
 export default async function ShopPage({ searchParams }) {
   // The shop is members-only: browsing, product pages and ordering all need an
   // account. Signed out, she goes to sign in and comes straight back to the shop.
-  await requireShopper('/shop');
-
+  //
+  // These three are independent — who she is, the URL filters, and the catalogue —
+  // so they run together. Sequentially they were three database round trips
+  // before a single byte reached the browser.
+  //
   // Next.js 15 hands searchParams over as a Promise. Reading it synchronously
   // logs a "should be awaited" error and will stop working in a future major.
-  const query = await searchParams;
+  const [, query, active] = await Promise.all([
+    requireShopper('/shop'),
+    searchParams,
+    readActiveProducts(),
+  ]);
 
   // Query strings are user input: split, drop blanks, and let the catalogue
   // helper ignore anything that is not a real category id. A repeated query
@@ -49,7 +56,6 @@ export default async function ShopPage({ searchParams }) {
 
   // Archived products never reach here — readActiveProducts drops them, and
   // filterProducts drops them again as a second line of defence.
-  const active = await readActiveProducts();
   const products = filterProducts(active, { categories, sort });
   // An empty catalogue and an over-tight filter both show zero cards but mean
   // different things, so they get different messages. "Clear a filter" is useless

@@ -54,11 +54,14 @@ export async function generateMetadata({ params }) {
 export default async function ProductPage({ params }) {
   const { id } = await params;
 
-  // The shop is members-only, so a product page is too. `next` brings her back
-  // to this exact product after signing in.
-  await requireShopper(`/shop/${id}`);
-
-  const product = await findVisibleProduct(id);
+  // Everything the page needs, at once: the session check, this product and the
+  // "more from the shop" pool are independent reads. Run sequentially they cost
+  // three database round trips before rendering starts.
+  const [, product, activeProducts] = await Promise.all([
+    requireShopper(`/shop/${id}`),
+    findVisibleProduct(id),
+    readActiveProducts(),
+  ]);
   if (!product) notFound();
 
   const category = CATEGORIES.find((c) => c.id === product.category);
@@ -67,7 +70,7 @@ export default async function ProductPage({ params }) {
 
   // A short "more from the shop" strip. Same category first, then anything else,
   // so a case page suggests cases rather than a random journal.
-  const others = (await readActiveProducts())
+  const others = activeProducts
     .filter((p) => p.id !== product.id)
     .sort((a, b) => Number(b.category === product.category) - Number(a.category === product.category))
     .slice(0, 4);

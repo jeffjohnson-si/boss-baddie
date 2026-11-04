@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { revalidateTag } from 'next/cache';
 import { currentAdmin } from '@/lib/current-admin';
 import {
   buildProduct,
@@ -56,6 +57,8 @@ export async function PATCH(request, { params }) {
   const archiveOnly = Object.keys(body ?? {}).length === 1 && 'archived' in (body ?? {});
   if (archiveOnly) {
     const product = await setProductArchived(id, body.archived);
+    // Hiding a product must remove it from the cached bag catalogue too.
+    revalidateTag('products');
     return NextResponse.json({ ok: true, product });
   }
 
@@ -68,6 +71,7 @@ export async function PATCH(request, { params }) {
 
   try {
     const product = await replaceProduct(id, result.product);
+    revalidateTag('products');
     return NextResponse.json({ ok: true, product });
   } catch (err) {
     console.error('[api/admin/products/:id] failed to update product:', err);
@@ -122,6 +126,7 @@ export async function DELETE(request, { params }) {
       }
       return NextResponse.json({ ok: false, errors: ['Product not found.'] }, { status: 404 });
     }
+    revalidateTag('products');
     return NextResponse.json({ ok: true, product: result.product });
   }
 
@@ -130,5 +135,6 @@ export async function DELETE(request, { params }) {
     return NextResponse.json({ ok: false, errors: ['Product not found.'] }, { status: 404 });
   }
 
+  revalidateTag('products');
   return NextResponse.json({ ok: true, product });
 }
