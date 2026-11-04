@@ -6,14 +6,14 @@ import {
   isCustomerAuthConfigured,
   isSecureRequest,
 } from '@/lib/customer-auth';
-import { getCustomerByPhone, normalizePhone, recordCustomerLogin } from '@/lib/customers';
+import { getCustomerByEmail, normalizeEmail, recordCustomerLogin } from '@/lib/customers';
 import { checkLoginCode } from '@/lib/login-verification';
 import { clientKey, hit } from '@/lib/rate-limit';
 
 /**
  * POST /api/account/login/verify — step two of passwordless sign-in.
  *
- * Body: { phone, code }
+ * Body: { email, code }
  *
  * On success the old code is consumed and a 400-day session cookie is issued.
  */
@@ -22,7 +22,7 @@ const LIMIT = 15;
 const WINDOW_MS = 15 * 60 * 1000;
 
 const MESSAGES = {
-  missing: 'There is no code waiting for that number. Request a new one.',
+  missing: 'There is no code waiting for that email. Request a new one.',
   expired: 'That code has expired. Request a new one.',
   too_many: 'Too many wrong codes. Request a new one.',
 };
@@ -53,15 +53,15 @@ export async function POST(request) {
     return NextResponse.json({ ok: false, errors: ['Invalid request body.'] }, { status: 400 });
   }
 
-  const phone = normalizePhone(body?.phone);
-  if (!phone) {
+  const email = normalizeEmail(body?.email);
+  if (!email) {
     return NextResponse.json(
-      { ok: false, errors: ['Enter the number you requested a code for.'] },
+      { ok: false, errors: ['Enter the email you requested a code for.'] },
       { status: 422 },
     );
   }
 
-  const result = await checkLoginCode(phone, body?.code);
+  const result = await checkLoginCode(email, body?.code);
   if (!result.ok) {
     const message =
       result.reason === 'wrong'
@@ -73,10 +73,10 @@ export async function POST(request) {
     return NextResponse.json({ ok: false, errors: [message] }, { status: 422 });
   }
 
-  const customer = await getCustomerByPhone(phone);
+  const customer = await getCustomerByEmail(email);
   if (!customer) {
     return NextResponse.json(
-      { ok: false, errors: ['That number no longer has an account.'] },
+      { ok: false, errors: ['That email no longer has an account.'] },
       { status: 404 },
     );
   }

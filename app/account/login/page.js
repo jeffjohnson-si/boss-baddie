@@ -48,7 +48,7 @@ export default async function LoginPage({ searchParams }) {
           <p className="bb-eyebrow mt-9 text-center">Your Account</p>
           <h1 className="mt-3 text-center font-display text-3xl text-bbInk">Welcome back.</h1>
           <p className="mt-2 text-center text-sm leading-relaxed text-bbInk/50">
-            Your orders, invoices and collection details — on any phone you sign in from.
+            Your orders, invoices and collection details — on any device you sign in from.
           </p>
 
           <LoginForm next={next} />

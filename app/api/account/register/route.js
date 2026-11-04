@@ -1,29 +1,31 @@
 import { NextResponse } from 'next/server';
 import { isCustomerAuthConfigured } from '@/lib/customer-auth';
-import { formatPhone, phoneTaken, validateSignup } from '@/lib/customers';
+import { emailTaken, validateSignup } from '@/lib/customers';
 import {
   consumeVerification,
   resendCooldownSeconds,
   startVerification,
   VERIFICATION_RULES,
 } from '@/lib/verification';
-import { isSmsConfigured, sendVerificationSms, smsProvider } from '@/lib/sms';
+import { emailProvider, isEmailConfigured, sendVerificationCode } from '@/lib/email';
 import { clientKey, hit } from '@/lib/rate-limit';
 
 /**
  * POST /api/account/register — step one of two.
  *
  * Nothing is created here. The form is validated, a pending verification row is
- * stored and a six-digit code is texted to the number. The account only exists
+ * stored and a six-digit code is emailed to the address. The account only exists
  * once /api/account/verify accepts that code. There is no password.
  *
- * That ordering is what makes "you must receive the SMS" true rather than
+ * That ordering is what makes "you must receive the email" true rather than
  * decorative: an unverified sign-up cannot sign in, cannot order, and does not
- * occupy the phone number.
+ * occupy the address.
  *
  * RATE LIMITED twice over: five sign-ups per address per hour, and a 60-second
- * cooldown per number so the endpoint cannot be used to bomb a phone (or run up an
- * SMS bill).
+ * cooldown per email so the endpoint cannot be used to bomb an inbox (or run up
+ * a Brevo bill).
+ *
+ * Body: { name, email, phone, location }
  */
 
 const LIMIT = 5;
@@ -46,10 +48,10 @@ export async function POST(request) {
     );
   }
 
-  if (!isSmsConfigured()) {
-    console.error(`[api/account/register] SMS is not configured (provider: ${smsProvider()}).`);
+  if (!isEmailConfigured()) {
+    console.error(`[api/account/register] Email is not configured (provider: ${emailProvider()}).`);
     return NextResponse.json(
-      { ok: false, errors: ['Text messages are not set up on this server yet, so accounts cannot be created.'] },
+      { ok: false, errors: ['Email is not set up on this server yet, so accounts cannot be created.'] },
       { status: 503 },
     );
   }
@@ -66,16 +68,16 @@ export async function POST(request) {
     return NextResponse.json({ ok: false, errors: check.errors }, { status: 422 });
   }
 
-  const { phone, name, location, email } = check.values;
+  const { email, name, phone, location } = check.values;
 
-  if (await phoneTaken(phone)) {
+  if (await emailTaken(email)) {
     return NextResponse.json(
-      { ok: false, errors: ['That number already has an account. Sign in instead.'] },
+      { ok: false, errors: ['That email already has an account. Sign in instead.'] },
       { status: 422 },
     );
   }
 
-  const wait = await resendCooldownSeconds(phone);
+  const wait = await resendCooldownSeconds(email);
   if (wait > 0) {
     return NextResponse.json(
       { ok: false, errors: ['A code was just sent. Wait a moment before asking for another.'] },
@@ -83,15 +85,15 @@ export async function POST(request) {
     );
   }
 
-  const code = await startVerification({ phone, name, location, email });
+  const code = await startVerification({ email, name, phone, location });
 
-  const sent = await sendVerificationSms(phone, code);
+  const sent = await sendVerificationCode({ to: email, code, purpose: 'signup' });
   if (!sent.ok) {
     // No half-finished sign-up left behind if the provider refuses the message.
-    await consumeVerification(phone);
-    console.error('[api/account/register] SMS failed:', sent.error);
+    await consumeVerification(email);
+    console.error('[api/account/register] email failed:', sent.error);
     return NextResponse.json(
-      { ok: false, errors: ['We could not send the text message. Check the number and try again.'] },
+      { ok: false, errors: ['We could not send the email. Check the address and try again.'] },
       { status: 502 },
     );
   }
@@ -99,15 +101,14 @@ export async function POST(request) {
   const payload = {
     ok: true,
     pending: true,
-    phone,
-    phoneDisplay: formatPhone(phone),
+    email,
     expiresIn: VERIFICATION_RULES.TTL_MINUTES * 60,
     resendAfter: VERIFICATION_RULES.RESEND_COOLDOWN_SECONDS,
   };
 
   // LOCAL TESTING ONLY. Without this flag a code is never in a response, which is
-  // why SMS_DEV_SHOW_CODE must stay unset in production.
-  if (process.env.SMS_DEV_SHOW_CODE === '1') payload.devCode = code;
+  // why EMAIL_DEV_SHOW_CODE must stay unset in production.
+  if (process.env.EMAIL_DEV_SHOW_CODE === '1') payload.devCode = code;
 
   return NextResponse.json(payload, { status: 201 });
 }

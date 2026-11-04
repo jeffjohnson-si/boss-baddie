@@ -8,8 +8,9 @@ import { currentCustomer } from '@/lib/current-customer';
 /**
  * CREATE ACCOUNT — /account/register
  *
- * The phone number is the handle; a texted code proves it. Signing up signs her in,
- * because there is no email to verify and nothing to wait for. There is no password.
+ * The email address is the handle; a code emailed through Brevo proves it. Signing
+ * up signs her in, because there is no password and nothing to wait for. The phone
+ * number is collected as contact information for collection, not verified.
  *
  * WHY AN ACCOUNT IS REQUIRED TO ORDER NOW: it is what makes her orders follow her
  * to a new phone. Before this, an invoice lived only in the browser that placed
@@ -50,8 +51,8 @@ export default async function RegisterPage({ searchParams }) {
             Create your account.
           </h1>
           <p className="mt-2 text-center text-sm leading-relaxed text-bbInk/50">
-            One account keeps your orders, invoices and collection details together — and follows
-            you to a new phone.
+            One account keeps your orders, invoices and collection details together — on any
+            device.
           </p>
 
           <RegisterForm next={next} />

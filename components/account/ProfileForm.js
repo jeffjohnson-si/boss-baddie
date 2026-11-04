@@ -3,20 +3,21 @@
 import { useState } from 'react';
 
 /**
- * ProfileForm — the details a customer can change: name, location and contact email.
+ * ProfileForm — the details a customer can change: name and location.
  *
- * The phone number is shown but NOT editable. It is the login handle, and moving it
- * would have to move the session with it; today Patricia changes a number by hand.
+ * The EMAIL ADDRESS is shown but NOT editable: it is the login handle, so
+ * changing it has to go through a fresh emailed code. The phone number is also
+ * shown read-only — Patricia arranges collections on it, so she needs to know it
+ * has not silently changed.
  *
  * The save is a PATCH to a route that takes the customer from the session cookie.
  * There is no id in the payload, so this form can only ever edit the person using
- * it. There is no password: sign-in is a texted code.
+ * it. There is no password: sign-in is an emailed code.
  */
 export default function ProfileForm({ customer }) {
   const [details, setDetails] = useState({
     name: customer.name,
     location: customer.location ?? '',
-    email: customer.email ?? '',
   });
   const [detailsState, setDetailsState] = useState({ errors: [], saved: false, busy: false });
 
@@ -65,10 +66,18 @@ export default function ProfileForm({ customer }) {
           </label>
 
           <label className="block">
+            <span className="bb-label">Email address</span>
+            <input type="email" value={customer.email ?? ''} readOnly disabled className="bb-input opacity-60" />
+            <span className="mt-2 block text-xs text-bbInk/40">
+              This is how you sign in. Message us if it needs changing.
+            </span>
+          </label>
+
+          <label className="block">
             <span className="bb-label">Phone number</span>
             <input type="tel" value={customer.phoneDisplay} readOnly disabled className="bb-input opacity-60" />
             <span className="mt-2 block text-xs text-bbInk/40">
-              This is your sign-in. Message us if you need it changed.
+              Patricia uses this to reach you about collection.
             </span>
           </label>
 
@@ -80,18 +89,6 @@ export default function ProfileForm({ customer }) {
               onChange={(event) => setDetails((current) => ({ ...current, location: event.target.value }))}
               className="bb-input"
               placeholder="e.g. Honiara — Ranadi, or Gizo"
-            />
-          </label>
-
-          <label className="block">
-            <span className="bb-label">Email (optional)</span>
-            <input
-              type="email"
-              autoComplete="email"
-              value={details.email}
-              onChange={(event) => setDetails((current) => ({ ...current, email: event.target.value }))}
-              className="bb-input"
-              placeholder="you@example.com"
             />
           </label>
         </div>

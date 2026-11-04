@@ -7,13 +7,14 @@ import { useRouter } from 'next/navigation';
 /**
  * RegisterForm — create a shop account, in two steps.
  *
- *   1. Details (name, phone, location) -> POST /api/account/register, which texts a
- *      six-digit code. No account exists yet at this point.
- *   2. The code -> POST /api/account/verify, which creates the account and signs her
- *      in.
+ *   1. Details (name, email, phone, location) -> POST /api/account/register,
+ *      which emails a six-digit code. No account exists yet at this point.
+ *   2. The code -> POST /api/account/verify, which creates the account and signs
+ *      her in.
  *
- * There is no password. The phone number is the login handle, and every new device
- * is signed in with another texted code.
+ * There is no password. The EMAIL ADDRESS is the login handle, and every new
+ * device is signed in with another emailed code. The phone number is collected
+ * only so Patricia can reach her about collection.
  *
  * The resend button counts down the same 60 seconds the server enforces, so the
  * interface never promises something the API will refuse.
@@ -31,8 +32,8 @@ export default function RegisterForm({ next = '/account' }) {
   const router = useRouter();
 
   const [step, setStep] = useState('details'); // 'details' | 'code'
-  const [form, setForm] = useState({ name: '', phone: '', location: '' });
-  const [pending, setPending] = useState(null); // { phone, phoneDisplay, devCode }
+  const [form, setForm] = useState({ name: '', email: '', phone: '', location: '' });
+  const [pending, setPending] = useState(null); // { email, devCode }
   const [code, setCode] = useState('');
   const [errors, setErrors] = useState([]);
   const [submitting, setSubmitting] = useState(false);
@@ -91,7 +92,7 @@ export default function RegisterForm({ next = '/account' }) {
       const response = await fetch('/api/account/verify', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ phone: pending?.phone, code }),
+        body: JSON.stringify({ email: pending?.email, code }),
       });
       const data = await response.json().catch(() => ({}));
 
@@ -119,7 +120,7 @@ export default function RegisterForm({ next = '/account' }) {
       const response = await fetch('/api/account/verify/resend', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ phone: pending?.phone }),
+        body: JSON.stringify({ email: pending?.email }),
       });
       const data = await response.json().catch(() => ({}));
 
@@ -144,17 +145,17 @@ export default function RegisterForm({ next = '/account' }) {
       <form onSubmit={submitCode} noValidate className="mt-8 space-y-5">
         <div className="border border-bbRose/25 bg-bbRose/[0.06] p-4">
           <p className="text-sm leading-relaxed text-bbInk/75">
-            We sent a {CODE_LENGTH}-digit code by text to{' '}
-            <strong className="text-bbInk">{pending?.phoneDisplay}</strong>. Enter it below to finish
+            We emailed a {CODE_LENGTH}-digit code to{' '}
+            <strong className="text-bbInk">{pending?.email}</strong>. Enter it below to finish
             creating your account.
           </p>
           <p className="mt-2 text-xs leading-relaxed text-bbInk/45">
-            It expires in 10 minutes. Nothing is charged for the message.
+            It expires in 10 minutes. Check your spam folder if it has not arrived.
           </p>
           {pending?.devCode && (
             <p className="mt-3 border-t border-bbRose/20 pt-3 text-xs text-bbGold">
               Development mode — the code is <span className="font-mono">{pending.devCode}</span>.
-              Real SMS sends as soon as a provider is configured.
+              A real email sends as soon as Brevo is configured.
             </p>
           )}
         </div>
@@ -210,7 +211,7 @@ export default function RegisterForm({ next = '/account' }) {
             }}
             className="text-bbInk/50 underline-offset-4 hover:text-bbInk hover:underline"
           >
-            Change number
+            Change details
           </button>
 
           <button
@@ -243,6 +244,24 @@ export default function RegisterForm({ next = '/account' }) {
       </label>
 
       <label className="block">
+        <span className="bb-label">Email address</span>
+        <input
+          type="email"
+          inputMode="email"
+          autoComplete="email"
+          value={form.email}
+          onChange={field('email').onChange}
+          required
+          className="bb-input"
+          placeholder="you@example.com"
+        />
+        <span className="mt-2 block text-xs leading-relaxed text-bbInk/40">
+          We email a code to this address to confirm it is yours. It is also how you sign in — no
+          password to remember.
+        </span>
+      </label>
+
+      <label className="block">
         <span className="bb-label">Phone number</span>
         <input
           type="tel"
@@ -255,8 +274,7 @@ export default function RegisterForm({ next = '/account' }) {
           placeholder="+677 740 0000"
         />
         <span className="mt-2 block text-xs leading-relaxed text-bbInk/40">
-          We text a code to this number to confirm it is yours. It is also how you sign in — no
-          password to remember.
+          So Patricia can reach you about collection. We never text a code to it.
         </span>
       </label>
 

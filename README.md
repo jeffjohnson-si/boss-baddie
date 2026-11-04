@@ -206,11 +206,11 @@ lib/
   auth.js              admin session signing and verification
   passwords.js         owner password hashing (scrypt) — SERVER ONLY
   customer-auth.js     shop session token (passwordless) — SERVER ONLY
-  customers.js         customer store: register, phone lookup, profile — SERVER ONLY
+  customers.js         customer store: register, email lookup, profile — SERVER ONLY
   current-customer.js  "who is signed in to the shop", for pages and routes
   verification.js      sign-up codes: generate, hash, expire, attempt limit
   login-verification.js  login codes: generate, hash, expire, attempt limit
-  sms.js               the SMS transport (console in dev, Twilio in production)
+  email.js             the mail transport (console in dev, Brevo in production)
   uploads.js           image upload rules, shared by both upload routes — SERVER ONLY
 db/schema.sql          PostgreSQL DDL — the database is the store
 mockups/               the three static design mockups
@@ -307,84 +307,78 @@ in Postgres. Set `CLOUDINARY_*` to send product photos and avatars to Cloudinary
 
 ## Accounts
 
-A shop account is a **phone number**, and it is **required to order**. That is a
-deliberate change: an order belongs to a person, not to one browser's
-`localStorage`, so her orders and invoices follow her to a new phone.
+A shop account is an **email address**, and it is **required to order**. That is a
+deliberate choice: an order belongs to a person, not to one browser's
+`localStorage`, so her orders and invoices follow her to any device.
 
-- `/account/register` — name, phone, optional village/suburb. Then a **six-digit
-  code by SMS**, which she types back. The account is created by that second step
-  and signs her in; there is no email and no password anywhere in the flow.
-- `/account/login` — phone, then a **six-digit code by SMS**. There is no password
-  to remember. The request answers the same way whether the number has an account
+- `/account/register` — name, email, phone, optional village/suburb. Then a
+  **six-digit code by email** (Brevo), which she types back. The account is created
+  by that second step and signs her in; there is no password anywhere in the flow.
+- `/account/login` — email, then a **six-digit code by email**. There is no password
+  to remember. The request answers the same way whether the address has an account
   or not, so it cannot be used to check who shops here.
 - `/account` — her orders newest-first, each with its status, its lines, the
   collection details Patricia arranged and a link to the invoice. Four counters on
   top: orders, to pay on collection, paid so far, open.
-- `/account/profile` — name, location and contact email. No password.
+- `/account/profile` — name and location only. The email address is the login handle
+  and the phone is how Patricia reaches her, so both are shown read-only.
 - **The shop is members-only.** `/shop` and every `/shop/<id>` page call
   `requireShopper()` (`lib/require-shopper.js`) and redirect to sign in with
   `?next=` pointing at the page she wanted, so she returns to it rather than to
   the homepage.
-- On an existing database, apply `db/migrations/001_customer_accounts.sql` and
-  `db/migrations/002_phone_verification.sql`; a fresh one gets the same tables from
-  `db/schema.sql`.
+- On an existing database, apply `db/migrations/011_email_accounts.sql`; a fresh one
+  gets the base tables from `db/schema.sql` followed by every migration.
 
-WHY PHONE AND NOT EMAIL: Patricia's customers reach her on WhatsApp and mostly
-leave the email field blank. The number is normalised on save (`normalisePhone()`
-in `lib/customers.js`) — `+677 740 0000`, `677-7400000` and `7400000` are one
-account — and it is UNIQUE in Postgres. The optional email is contact-only and is
-never a login handle.
+WHY EMAIL: a code by email costs nothing to run on Brevo's free plan, works on any
+device, and needs no telecom coverage check. The address is normalised on save
+(`normalizeEmail()` in `lib/customers.js`) — trimmed and lowercased, with a unique
+index on `lower(email)` — so `Patricia@Example.com` and `patricia@example.com` are
+the same account.
 
-### The code is texted, and required
+The phone number is still collected and still required: Patricia arranges
+collection on it and it is snapshotted onto every order. It is **not verified**, and
+no longer unique — two people in one household may share a number.
+
+### The code is emailed, and required
 
 Sign-up is two requests. `/api/account/register` validates the form, writes a row
-to `signup_verifications` and sends a text. **No customer row exists yet.**
+to `signup_verifications` and sends an email. **No customer row exists yet.**
 `/api/account/verify` checks the code, creates the customer and signs her in. So an
-unverified sign-up cannot log in, cannot order, and does not occupy the phone
-number — and if the SMS provider fails, the pending row is deleted rather than left
-as a half-made account.
+unverified sign-up cannot log in, cannot order, and does not occupy the address —
+and if Brevo refuses the message, the pending row is deleted rather than left as a
+half-made account.
 
-Sign-in is the same idea. `/api/account/login/request` texts a code to an existing
-account; `/api/account/login/verify` checks it and issues the session. A number
-with no account gets the same response but no text.
+Sign-in is the same idea. `/api/account/login/request` emails a code to an existing
+account; `/api/account/login/verify` checks it and issues the session. An address
+with no account gets the same response but no email.
 
 The rules apply to both `signup_verifications` and `customer_login_codes`:
 
 - Six digits, generated with `crypto.randomInt` — never `Math.random`.
-- Stored as an HMAC of phone + code, keyed with `CUSTOMER_SESSION_SECRET`. The
+- Stored as an HMAC of email + code, keyed with `CUSTOMER_SESSION_SECRET`. The
   database never holds a usable code, even if it leaks.
 - Ten minutes to live, five attempts, then the row is destroyed.
-- Sixty seconds between sends per number. Registration is limited to five per
+- Sixty seconds between sends per address. Registration is limited to five per
   address per hour; login-code requests to ten per address per fifteen minutes and
-  five per number per hour.
+  five per email per hour.
 
-HOW THE TEXTS GO OUT is `SMS_PROVIDER` in `lib/sms.js`:
+HOW THE EMAIL GOES OUT is `EMAIL_PROVIDER` in `lib/email.js` — the same transport
+that sends Patricia's password resets:
 
 ```
-SMS_PROVIDER=console   # development: prints the message to the server log
+EMAIL_PROVIDER=console   # development: prints the message to the server log
 
-SMS_PROVIDER=twilio    # real SMS. Needs TWILIO_ACCOUNT_SID and TWILIO_AUTH_TOKEN,
-                       # plus ONE sender: TWILIO_MESSAGING_SERVICE_SID (preferred)
-                       # or TWILIO_FROM.
+EMAIL_PROVIDER=brevo     # real mail. Needs BREVO_API_KEY, EMAIL_FROM and
+                         # EMAIL_FROM_NAME; the sender must be verified in Brevo.
 ```
 
-Twilio requires the `To` number in E.164 form, which `toE164()` produces (a
-seven-digit Solomon Islands number becomes `+677…`). Trial accounts only deliver
-to numbers verified in the Twilio console, which is what error 21608 means — the
-provider errors are mapped to that kind of plain sentence in `lib/sms.js`.
+`sendVerificationCode()` in `lib/email.js` owns the wording, so sign-up and sign-in
+cannot drift apart. `EMAIL_DEV_SHOW_CODE=1` additionally returns the code in the
+API response so a laptop can finish the flow — it must never be set on a deployed
+server.
 
-**Testing the credentials without signing anyone up:** while signed in to
-`/admin`, `POST /api/admin/sms-test` with `{ "to": "+677 7xxxxxx" }` sends one
-message and returns the Twilio id, or the provider error and what to do about it.
-It is admin-only and limited to five messages an hour, because it spends money.
-
-`console` is the default and sends nothing. `SMS_DEV_SHOW_CODE=1` additionally
-returns the code in the API response so a laptop can finish the flow — it must
-never be set on a deployed server. Adding a local aggregator (Our Telekom, a
-reseller) means one more branch in `sendSms()` and nothing else.
-
-WHAT IS STORED, and where: a `customers` row (name, phone, location, optional
-email). No password, no card, no address, nothing to charge. Every order now
+WHAT IS STORED, and where: a `customers` row (name, email, phone, location). No
+password, no card, no address, nothing to charge. Every order now
 carries `customer_id`; the name, phone and location are still snapshotted on the
 order itself, so Patricia's order sheet and the printed invoice read exactly as
 they did before accounts existed, and an order survives its account being deleted
@@ -734,7 +728,7 @@ variable from `.env.example`, with these production differences:
 - `CLOUDINARY_*` — required; the free plan needs no card. The Netlify filesystem
   is ephemeral.
 - `NEXT_PUBLIC_SITE_URL` — the real site URL, so reset links work.
-- Do **not** set `DEV_LOGIN_ENABLED` or `SMS_DEV_SHOW_CODE`.
+- Do **not** set `DEV_LOGIN_ENABLED` or `EMAIL_DEV_SHOW_CODE`.
 
 Never leave `EMAIL_PROVIDER=console` on the deployed site: reset links would be
 written to the server log instead of delivered.
@@ -757,12 +751,12 @@ alive across deploys.
 - [ ] `/admin/forgot` delivers a Brevo email, and the link sets a new password once
 - [ ] A recovery email receives its confirmation, then a reset link
 - [ ] Changing the password signs out a second browser using the old session
-- [ ] Sign-up texts a code, and no account exists until the right code is entered
+- [ ] Sign-up emails a code, and no account exists until the right code is entered
 - [ ] A wrong code is refused, and the fifth wrong code ends that sign-up
-- [ ] Logging out, then signing in with phone + a new texted code works
-- [ ] An unknown phone number gets the generic response and no code
-- [ ] `SMS_PROVIDER=console` prints the message in the server log; a real provider
-      delivers it to a Solomon Islands number
+- [ ] Logging out, then signing in with email + a new emailed code works
+- [ ] An unknown email address gets the generic response and no code
+- [ ] `EMAIL_PROVIDER=console` prints the message in the server log; Brevo delivers
+      it to a real inbox
 - [ ] `/checkout` sends a signed-out visitor to sign in, then back to checkout
 - [ ] A new account sees its own order at `/shop/invoices`, and no one else's
 - [ ] Signed out, `/shop` and a product link both land on sign-in and then back
@@ -920,8 +914,8 @@ Not yet, and worth doing before scale:
   that admin login always answers "those details do not match", which looks like
   a wrong password rather than a broken server. A boot-time check would be worth
   adding.
-- **Production SMS.** Passwordless sign-in needs a real SMS provider. `console`
-  only prints codes to the server log and is development-only.
+- **Production email.** Passwordless sign-in needs Brevo configured and its sender
+  verified. `console` only prints codes to the server log and is development-only.
 - **Per-user accounts and an audit trail** once more than one person has access.
 - **CSRF tokens** on the admin mutation routes. Same-site cookies cover the common
   case, not every case.

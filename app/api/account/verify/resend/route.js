@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { normalizePhone } from '@/lib/customers';
+import { normalizeEmail } from '@/lib/customers';
 import {
   consumeVerification,
   hasPending,
@@ -7,7 +7,7 @@ import {
   restartVerification,
   VERIFICATION_RULES,
 } from '@/lib/verification';
-import { isSmsConfigured, sendVerificationSms } from '@/lib/sms';
+import { isEmailConfigured, sendVerificationCode } from '@/lib/email';
 import { clientKey, hit } from '@/lib/rate-limit';
 
 /**
@@ -15,7 +15,9 @@ import { clientKey, hit } from '@/lib/rate-limit';
  *
  * The details are not asked for again: the pending row already holds them, so this
  * only replaces the code and the expiry. Cooldown is enforced here as well as in
- * the register route, because this is the endpoint a driver would call in a loop.
+ * the register route, because this is the endpoint a script would call in a loop.
+ *
+ * Body: { email }
  */
 
 const LIMIT = 5;
@@ -33,9 +35,9 @@ export async function POST(request) {
     );
   }
 
-  if (!isSmsConfigured()) {
+  if (!isEmailConfigured()) {
     return NextResponse.json(
-      { ok: false, errors: ['Text messages are not set up on this server yet.'] },
+      { ok: false, errors: ['Email is not set up on this server yet.'] },
       { status: 503 },
     );
   }
@@ -47,12 +49,12 @@ export async function POST(request) {
     return NextResponse.json({ ok: false, errors: ['Invalid request body.'] }, { status: 400 });
   }
 
-  const phone = normalizePhone(body?.phone);
-  if (!phone) {
-    return NextResponse.json({ ok: false, errors: ['Invalid number.'] }, { status: 422 });
+  const email = normalizeEmail(body?.email);
+  if (!email) {
+    return NextResponse.json({ ok: false, errors: ['Invalid email address.'] }, { status: 422 });
   }
 
-  const wait = await resendCooldownSeconds(phone);
+  const wait = await resendCooldownSeconds(email);
   if (wait > 0) {
     return NextResponse.json(
       { ok: false, errors: [`Wait ${wait} seconds before asking for another code.`] },
@@ -60,27 +62,27 @@ export async function POST(request) {
     );
   }
 
-  if (!(await hasPending(phone))) {
+  if (!(await hasPending(email))) {
     return NextResponse.json(
-      { ok: false, errors: ['There is no sign-up waiting for that number. Start again.'] },
+      { ok: false, errors: ['There is no sign-up waiting for that email. Start again.'] },
       { status: 404 },
     );
   }
 
-  const code = await restartVerification(phone);
+  const code = await restartVerification(email);
   if (!code) {
     return NextResponse.json(
-      { ok: false, errors: ['There is no sign-up waiting for that number. Start again.'] },
+      { ok: false, errors: ['There is no sign-up waiting for that email. Start again.'] },
       { status: 404 },
     );
   }
 
-  const sent = await sendVerificationSms(phone, code);
+  const sent = await sendVerificationCode({ to: email, code, purpose: 'signup' });
   if (!sent.ok) {
-    await consumeVerification(phone);
-    console.error('[api/account/verify/resend] SMS failed:', sent.error);
+    await consumeVerification(email);
+    console.error('[api/account/verify/resend] email failed:', sent.error);
     return NextResponse.json(
-      { ok: false, errors: ['We could not send the text message. Start again.'] },
+      { ok: false, errors: ['We could not send the email. Start again.'] },
       { status: 502 },
     );
   }
@@ -92,7 +94,7 @@ export async function POST(request) {
   };
 
   // LOCAL TESTING ONLY — see the same note in the register route.
-  if (process.env.SMS_DEV_SHOW_CODE === '1') payload.devCode = code;
+  if (process.env.EMAIL_DEV_SHOW_CODE === '1') payload.devCode = code;
 
   return NextResponse.json(payload);
 }

@@ -34,7 +34,8 @@ export default async function ProfilePage() {
           <p className="bb-eyebrow">Your Account</p>
           <h1 className="bb-h2 mt-3">Profile &amp; settings</h1>
           <p className="mt-2 max-w-xl text-sm leading-relaxed text-bbInk/50">
-            Change what we use to reach you. Sign-in is a texted code, so there is no password here.
+            Sign-in is an emailed code, so there is no password here. Your email address and
+            phone number are fixed — message us to change either.
           </p>
         </header>
 

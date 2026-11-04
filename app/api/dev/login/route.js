@@ -13,7 +13,7 @@ export const dynamic = 'force-dynamic';
 /**
  * GET /api/dev/login?next=/shop — DEVELOPMENT ONLY.
  *
- * Signs the browser in as a preview customer with no password and no SMS, so the
+ * Signs the browser in as a preview customer with no password and no emailed code, so the
  * pages behind the gate can be reviewed while the app is still being built.
  *
  * IT REFUSES TO RUN unless DEV_LOGIN_ENABLED=1 is set in the environment. That
@@ -27,6 +27,7 @@ export const dynamic = 'force-dynamic';
  */
 
 const PREVIEW_PHONE = process.env.DEV_LOGIN_PHONE || '7412345';
+const PREVIEW_EMAIL = 'preview@bossbaddie.test';
 const PREVIEW_NAME = 'Preview Customer';
 
 export async function GET(request) {
@@ -40,18 +41,18 @@ export async function GET(request) {
   const next = requested.startsWith('/') && !requested.startsWith('//') ? requested : '/account';
 
   const { rows } = await pool.query(
-    'SELECT id, session_version FROM customers WHERE phone = $1',
-    [PREVIEW_PHONE],
+    'SELECT id, session_version FROM customers WHERE lower(email) = $1',
+    [PREVIEW_EMAIL],
   );
   let customerId = rows[0]?.id;
   let sessionVersion = rows[0]?.session_version ?? 0;
 
   if (!customerId) {
     const created = await createCustomer({
+      email: PREVIEW_EMAIL,
       phone: PREVIEW_PHONE,
       name: PREVIEW_NAME,
       location: 'Honiara',
-      email: '',
     });
 
     if (!created.ok) {

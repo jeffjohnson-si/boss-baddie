@@ -1,29 +1,31 @@
 import { NextResponse } from 'next/server';
 import { isCustomerAuthConfigured } from '@/lib/customer-auth';
-import { formatPhone, normalizePhone, phoneTaken } from '@/lib/customers';
+import { emailTaken, normalizeEmail } from '@/lib/customers';
 import {
   consumeLoginCode,
   resendLoginCooldownSeconds,
   startLoginVerification,
 } from '@/lib/login-verification';
 import { VERIFICATION_RULES } from '@/lib/verification';
-import { isSmsConfigured, sendVerificationSms, smsProvider } from '@/lib/sms';
+import { emailProvider, isEmailConfigured, sendVerificationCode } from '@/lib/email';
 import { clientKey, hit } from '@/lib/rate-limit';
 
 /**
  * POST /api/account/login/request — step one of passwordless sign-in.
  *
- * Body: { phone }
+ * Body: { email }
  *
- * If the number has an account, a six-digit code is texted. The response is the
- * same whether or not the account exists, so this endpoint cannot be used to
- * enumerate Patricia's customers.
+ * If the address has an account, a six-digit code is emailed. The response is
+ * identical whether or not the account exists, so this endpoint cannot be used
+ * to enumerate Patricia's customers — including when the per-address limit is
+ * reached, which is why that limit is counted in memory for every address rather
+ * than only for real accounts.
  */
 
 const IP_LIMIT = 10;
 const IP_WINDOW_MS = 15 * 60 * 1000;
-const PHONE_LIMIT = 5;
-const PHONE_WINDOW_MS = 60 * 60 * 1000;
+const EMAIL_LIMIT = 5;
+const EMAIL_WINDOW_MS = 60 * 60 * 1000;
 
 export async function POST(request) {
   const ipGate = hit(`customer-login-request-ip:${clientKey(request)}`, {
@@ -44,10 +46,10 @@ export async function POST(request) {
     );
   }
 
-  if (!isSmsConfigured()) {
-    console.error(`[api/account/login/request] SMS is not configured (provider: ${smsProvider()}).`);
+  if (!isEmailConfigured()) {
+    console.error(`[api/account/login/request] Email is not configured (provider: ${emailProvider()}).`);
     return NextResponse.json(
-      { ok: false, errors: ['Text messages are not set up on this server yet.'] },
+      { ok: false, errors: ['Email is not set up on this server yet.'] },
       { status: 503 },
     );
   }
@@ -59,58 +61,53 @@ export async function POST(request) {
     return NextResponse.json({ ok: false, errors: ['Invalid request body.'] }, { status: 400 });
   }
 
-  const phone = normalizePhone(body?.phone);
-  if (!phone) {
+  const email = normalizeEmail(body?.email);
+  if (!email) {
     return NextResponse.json(
-      { ok: false, errors: ['Enter the phone number on your account.'] },
+      { ok: false, errors: ['Enter the email address on your account.'] },
       { status: 422 },
     );
   }
 
-  const phoneGate = hit(`customer-login-request-phone:${phone}`, {
-    limit: PHONE_LIMIT,
-    windowMs: PHONE_WINDOW_MS,
+  const emailGate = hit(`customer-login-request-email:${email}`, {
+    limit: EMAIL_LIMIT,
+    windowMs: EMAIL_WINDOW_MS,
   });
-  if (!phoneGate.ok) {
+  if (!emailGate.ok) {
     return NextResponse.json(
-      { ok: false, errors: ['Too many codes for that number. Try again later.'] },
-      { status: 429, headers: { 'Retry-After': String(phoneGate.retryAfter) } },
+      { ok: false, errors: ['Too many codes for that email. Try again later.'] },
+      { status: 429, headers: { 'Retry-After': String(emailGate.retryAfter) } },
     );
   }
 
   const payload = {
     ok: true,
     pending: true,
-    phone,
-    phoneDisplay: formatPhone(phone),
+    email,
     expiresIn: VERIFICATION_RULES.TTL_MINUTES * 60,
     resendAfter: VERIFICATION_RULES.RESEND_COOLDOWN_SECONDS,
   };
 
   // No account: answer exactly the same way, but send nothing.
-  if (!(await phoneTaken(phone))) return NextResponse.json(payload);
+  if (!(await emailTaken(email))) return NextResponse.json(payload);
 
-  const wait = await resendLoginCooldownSeconds(phone);
-  if (wait > 0) {
-    return NextResponse.json(
-      { ok: false, errors: [`Wait ${wait} seconds before asking for another code.`] },
-      { status: 429, headers: { 'Retry-After': String(wait) } },
-    );
-  }
+  // A second request inside the cooldown answers the same and sends nothing, so
+  // pressing "send again" twice does not read as a different kind of address.
+  if ((await resendLoginCooldownSeconds(email)) > 0) return NextResponse.json(payload);
 
-  const code = await startLoginVerification(phone);
-  const sent = await sendVerificationSms(phone, code);
+  const code = await startLoginVerification(email);
+  const sent = await sendVerificationCode({ to: email, code, purpose: 'login' });
   if (!sent.ok) {
-    await consumeLoginCode(phone);
-    console.error('[api/account/login/request] SMS failed:', sent.error);
+    await consumeLoginCode(email);
+    console.error('[api/account/login/request] email failed:', sent.error);
     return NextResponse.json(
-      { ok: false, errors: ['We could not send the text message. Check the number and try again.'] },
+      { ok: false, errors: ['We could not send the email. Check the address and try again.'] },
       { status: 502 },
     );
   }
 
   // LOCAL TESTING ONLY — see the note in the register route.
-  if (process.env.SMS_DEV_SHOW_CODE === '1') payload.devCode = code;
+  if (process.env.EMAIL_DEV_SHOW_CODE === '1') payload.devCode = code;
 
   return NextResponse.json(payload);
 }

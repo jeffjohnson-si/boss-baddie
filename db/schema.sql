@@ -131,18 +131,20 @@ CREATE INDEX IF NOT EXISTS products_live_idx     ON products (category) WHERE NO
 -- definition is what a fresh one gets.
 CREATE TABLE IF NOT EXISTS customers (
   id            TEXT PRIMARY KEY,                    -- 'cus_<uuid>'
-  phone         TEXT NOT NULL UNIQUE CHECK (phone ~ '^[0-9]{6,15}$'),
+  -- Contact number, not the login handle: not verified and not unique, because
+  -- two people in one household may share one. See migration 011.
+  phone         TEXT NOT NULL CHECK (phone ~ '^[0-9]{6,15}$'),
   name          TEXT NOT NULL CHECK (char_length(trim(name)) BETWEEN 2 AND 60),
   location      TEXT,                                -- prefilled into checkout
-  email         TEXT,                                -- contact only, not a login
+  -- The login handle: a code is emailed here. Unique on lower(email) — the index
+  -- is created by migration 011.
+  email         TEXT,
 
-  -- The community face: a name she chooses for the room and a picture. The room
-  -- gates on community_profile_set_at. The phone number is NOT duplicated — it is
-  -- `phone` above, and is displayed beside her name in the chat.
+  -- Columns kept from the retired members' room; nothing reads them.
   community_name            TEXT,
   avatar                    TEXT,                    -- '/uploads/a-<uuid>.<ext>'
   community_profile_set_at  TIMESTAMPTZ,
-  password_hash TEXT NOT NULL,                       -- scrypt$<salt>$<hash>
+  password_hash TEXT,                                -- nullable since migration 009
   created_at    TIMESTAMPTZ NOT NULL DEFAULT now(),
   updated_at    TIMESTAMPTZ NOT NULL DEFAULT now(),
   last_login_at TIMESTAMPTZ
@@ -154,16 +156,14 @@ CREATE INDEX IF NOT EXISTS customers_created_at_idx ON customers (created_at DES
 -- signup_verifications — the pending half of a sign-up
 -- ---------------------------------------------------------------------------
 -- Sign-up is two steps: this row holds the details and the hashed code while the
--- SMS is in flight, and the customer row is only created when /api/account/verify
--- accepts the code. Applying db/schema.sql to a fresh database without this table
--- would make registration fail at the first request.
+-- email is in flight, and the customer row is only created when
+-- /api/account/verify accepts the code. Keyed by email since migration 011.
 CREATE TABLE IF NOT EXISTS signup_verifications (
-  phone         TEXT PRIMARY KEY CHECK (phone ~ '^[0-9]{6,15}$'),
+  email         TEXT PRIMARY KEY,
   code_hash     TEXT NOT NULL,
   name          TEXT NOT NULL,
+  phone         TEXT,
   location      TEXT,
-  email         TEXT,
-  password_hash TEXT NOT NULL,
   attempts      INTEGER NOT NULL DEFAULT 0,
   sent_at       TIMESTAMPTZ NOT NULL DEFAULT now(),
   expires_at    TIMESTAMPTZ NOT NULL

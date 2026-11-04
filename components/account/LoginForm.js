@@ -5,14 +5,14 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 
 /**
- * LoginForm — phone number, then a texted six-digit code. No password.
+ * LoginForm — email address, then an emailed six-digit code. No password.
  *
- *   step 1  phone  -> POST /api/account/login/request
+ *   step 1  email  -> POST /api/account/login/request
  *   step 2  code   -> POST /api/account/login/verify
  *
- * The request endpoint answers the same way whether or not the number has an
+ * The request endpoint answers the same way whether or not the address has an
  * account, so the page never confirms who shops here. The code step is where a
- * wrong or unknown number becomes visible.
+ * wrong or unknown address becomes visible.
  *
  * `next` is treated as untrusted: only a site-relative path starting with a
  * single "/" is followed.
@@ -29,9 +29,9 @@ const CODE_LENGTH = 6;
 export default function LoginForm({ next = '/account' }) {
   const router = useRouter();
 
-  const [step, setStep] = useState('phone'); // 'phone' | 'code'
-  const [phone, setPhone] = useState('');
-  const [pending, setPending] = useState(null); // { phone, phoneDisplay, devCode }
+  const [step, setStep] = useState('email'); // 'email' | 'code'
+  const [email, setEmail] = useState('');
+  const [pending, setPending] = useState(null); // { email, devCode }
   const [code, setCode] = useState('');
   const [errors, setErrors] = useState([]);
   const [notice, setNotice] = useState('');
@@ -54,7 +54,7 @@ export default function LoginForm({ next = '/account' }) {
       const response = await fetch('/api/account/login/request', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ phone }),
+        body: JSON.stringify({ email }),
       });
       const data = await response.json().catch(() => ({}));
 
@@ -84,7 +84,7 @@ export default function LoginForm({ next = '/account' }) {
       const response = await fetch('/api/account/login/verify', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ phone: pending?.phone ?? phone, code }),
+        body: JSON.stringify({ email: pending?.email ?? email, code }),
       });
       const data = await response.json().catch(() => ({}));
 
@@ -112,7 +112,7 @@ export default function LoginForm({ next = '/account' }) {
       const response = await fetch('/api/account/login/request', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ phone: pending?.phone ?? phone }),
+        body: JSON.stringify({ email: pending?.email ?? email }),
       });
       const data = await response.json().catch(() => ({}));
 
@@ -137,16 +137,16 @@ export default function LoginForm({ next = '/account' }) {
       <form onSubmit={verifyCode} noValidate className="mt-8 space-y-5">
         <div className="border border-bbRose/25 bg-bbRose/[0.06] p-4">
           <p className="text-sm leading-relaxed text-bbInk/75">
-            If <strong className="text-bbInk">{pending?.phoneDisplay ?? 'that number'}</strong> has
-            an account, a {CODE_LENGTH}-digit code is on its way. Enter it below to sign in.
+            If <strong className="text-bbInk">{pending?.email ?? 'that address'}</strong> has an
+            account, a {CODE_LENGTH}-digit code is on its way. Enter it below to sign in.
           </p>
           <p className="mt-2 text-xs leading-relaxed text-bbInk/45">
-            It expires in 10 minutes. No password is needed.
+            It expires in 10 minutes. No password is needed. Check spam if it has not arrived.
           </p>
           {pending?.devCode && (
             <p className="mt-3 border-t border-bbRose/20 pt-3 text-xs text-bbGold">
               Development mode — the code is <span className="font-mono">{pending.devCode}</span>.
-              Real SMS sends as soon as a provider is configured.
+              A real email sends as soon as Brevo is configured.
             </p>
           )}
         </div>
@@ -196,14 +196,14 @@ export default function LoginForm({ next = '/account' }) {
           <button
             type="button"
             onClick={() => {
-              setStep('phone');
+              setStep('email');
               setCode('');
               setErrors([]);
               setNotice('');
             }}
             className="text-bbInk/50 underline-offset-4 hover:text-bbInk hover:underline"
           >
-            Change number
+            Change email
           </button>
 
           <button
@@ -229,24 +229,24 @@ export default function LoginForm({ next = '/account' }) {
     );
   }
 
-  /* ---------------- Step 1: phone ---------------- */
+  /* ---------------- Step 1: email ---------------- */
   return (
     <form onSubmit={requestCode} noValidate className="mt-8 space-y-5">
       <label className="block">
-        <span className="bb-label">Phone number</span>
+        <span className="bb-label">Email address</span>
         <input
-          type="tel"
-          inputMode="tel"
-          autoComplete="tel"
-          value={phone}
-          onChange={(event) => setPhone(event.target.value)}
+          type="email"
+          inputMode="email"
+          autoComplete="email"
+          value={email}
+          onChange={(event) => setEmail(event.target.value)}
           required
           autoFocus
           className="bb-input"
-          placeholder="+677 740 0000"
+          placeholder="you@example.com"
         />
         <span className="mt-2 block text-xs leading-relaxed text-bbInk/40">
-          We text a six-digit code. There is no password to remember.
+          We email a six-digit code. There is no password to remember.
         </span>
       </label>
 
