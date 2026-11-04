@@ -315,8 +315,8 @@ deliberate choice: an order belongs to a person, not to one browser's
   **six-digit code by email** (Brevo), which she types back. The account is created
   by that second step and signs her in; there is no password anywhere in the flow.
 - `/account/login` — email, then a **six-digit code by email**. There is no password
-  to remember. The request answers the same way whether the address has an account
-  or not, so it cannot be used to check who shops here.
+  to remember. An address with no account is told so plainly, with a pop-up offering
+  sign-up (see below).
 - `/account` — her orders newest-first, each with its status, its lines, the
   collection details Patricia arranged and a link to the invoice. Four counters on
   top: orders, to pay on collection, paid so far, open.
@@ -349,8 +349,16 @@ and if Brevo refuses the message, the pending row is deleted rather than left as
 half-made account.
 
 Sign-in is the same idea. `/api/account/login/request` emails a code to an existing
-account; `/api/account/login/verify` checks it and issues the session. An address
-with no account gets the same response but no email.
+account; `/api/account/login/verify` checks it and issues the session.
+
+**An unknown address is refused, not ignored.** The request answers `404` with
+`needsAccount: true`, and the sign-in page shows a pop-up naming the address and
+offering **Create An Account** (which carries the address into the sign-up form).
+That is a deliberate trade against the usual anti-enumeration default: answering
+identically for every address meant a new customer was told "a code is on its way"
+and then waited forever for an email that was never sent. The cost is that this
+endpoint reveals whether an address shops here. The per-address rate limit still
+counts every address, and a code is only generated for an account that exists.
 
 The rules apply to both `signup_verifications` and `customer_login_codes`:
 

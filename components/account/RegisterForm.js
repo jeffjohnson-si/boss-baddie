@@ -28,11 +28,16 @@ function safeNext(value) {
 
 const CODE_LENGTH = 6;
 
-export default function RegisterForm({ next = '/account' }) {
+export default function RegisterForm({ next = '/account', defaultEmail = '' }) {
   const router = useRouter();
 
   const [step, setStep] = useState('details'); // 'details' | 'code'
-  const [form, setForm] = useState({ name: '', email: '', phone: '', location: '' });
+  const [form, setForm] = useState({
+    name: '',
+    email: defaultEmail,
+    phone: '',
+    location: '',
+  });
   const [pending, setPending] = useState(null); // { email, devCode }
   const [code, setCode] = useState('');
   const [errors, setErrors] = useState([]);

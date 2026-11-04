@@ -37,12 +37,25 @@ export default function LoginForm({ next = '/account' }) {
   const [notice, setNotice] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [cooldown, setCooldown] = useState(0);
+  // The address that has no account, when the server says so. Holds the email so
+  // the pop-up can name it and the sign-up link can prefill it.
+  const [signupPrompt, setSignupPrompt] = useState(null);
 
   useEffect(() => {
     if (cooldown <= 0) return undefined;
     const timer = setTimeout(() => setCooldown((value) => value - 1), 1000);
     return () => clearTimeout(timer);
   }, [cooldown]);
+
+  // Escape closes the pop-up, as it would any dialog.
+  useEffect(() => {
+    if (!signupPrompt) return undefined;
+    const onKey = (event) => {
+      if (event.key === 'Escape') setSignupPrompt(null);
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [signupPrompt]);
 
   async function requestCode(event) {
     event?.preventDefault();
@@ -57,6 +70,13 @@ export default function LoginForm({ next = '/account' }) {
         body: JSON.stringify({ email }),
       });
       const data = await response.json().catch(() => ({}));
+
+      // The address has no account. Nothing was sent; offer sign-up instead of
+      // advancing to a code screen that would never receive one.
+      if (response.status === 404 && data?.needsAccount) {
+        setSignupPrompt(data.email ?? email);
+        return;
+      }
 
       if (!response.ok || !data.ok) {
         setErrors(data.errors ?? ['Could not send a code. Check your connection and try again.']);
@@ -137,8 +157,9 @@ export default function LoginForm({ next = '/account' }) {
       <form onSubmit={verifyCode} noValidate className="mt-8 space-y-5">
         <div className="border border-bbRose/25 bg-bbRose/[0.06] p-4">
           <p className="text-sm leading-relaxed text-bbInk/75">
-            If <strong className="text-bbInk">{pending?.email ?? 'that address'}</strong> has an
-            account, a {CODE_LENGTH}-digit code is on its way. Enter it below to sign in.
+            We emailed a {CODE_LENGTH}-digit code to{' '}
+            <strong className="text-bbInk">{pending?.email ?? 'your address'}</strong>. Enter it
+            below to sign in.
           </p>
           <p className="mt-2 text-xs leading-relaxed text-bbInk/45">
             It expires in 10 minutes. No password is needed. Check spam if it has not arrived.
@@ -231,48 +252,96 @@ export default function LoginForm({ next = '/account' }) {
 
   /* ---------------- Step 1: email ---------------- */
   return (
-    <form onSubmit={requestCode} noValidate className="mt-8 space-y-5">
-      <label className="block">
-        <span className="bb-label">Email address</span>
-        <input
-          type="email"
-          inputMode="email"
-          autoComplete="email"
-          value={email}
-          onChange={(event) => setEmail(event.target.value)}
-          required
-          autoFocus
-          className="bb-input"
-          placeholder="you@example.com"
-        />
-        <span className="mt-2 block text-xs leading-relaxed text-bbInk/40">
-          We email a six-digit code. There is no password to remember.
-        </span>
-      </label>
+    <>
+      <form onSubmit={requestCode} noValidate className="mt-8 space-y-5">
+        <label className="block">
+          <span className="bb-label">Email address</span>
+          <input
+            type="email"
+            inputMode="email"
+            autoComplete="email"
+            value={email}
+            onChange={(event) => setEmail(event.target.value)}
+            required
+            autoFocus
+            className="bb-input"
+            placeholder="you@example.com"
+          />
+          <span className="mt-2 block text-xs leading-relaxed text-bbInk/40">
+            We email a six-digit code. There is no password to remember.
+          </span>
+        </label>
 
-      {errors.length > 0 && (
-        <div role="alert" className="border border-bbRose/50 bg-bbRose/[0.07] p-4">
-          <ul className="list-inside list-disc space-y-1 text-sm text-bbInk/80">
-            {errors.map((error) => (
-              <li key={error}>{error}</li>
-            ))}
-          </ul>
+        {errors.length > 0 && (
+          <div role="alert" className="border border-bbRose/50 bg-bbRose/[0.07] p-4">
+            <ul className="list-inside list-disc space-y-1 text-sm text-bbInk/80">
+              {errors.map((error) => (
+                <li key={error}>{error}</li>
+              ))}
+            </ul>
+          </div>
+        )}
+
+        <button type="submit" disabled={submitting} className="bb-btn-solid w-full disabled:opacity-50">
+          {submitting ? 'Sending code…' : 'Send My Code'}
+        </button>
+
+        <p className="pt-2 text-center text-sm text-bbInk/55">
+          New here?{' '}
+          <Link
+            href={`/account/register?next=${encodeURIComponent(safeNext(next))}`}
+            className="text-bbRose underline-offset-4 hover:underline"
+          >
+            Create an account
+          </Link>
+        </p>
+      </form>
+
+      {/* No account for that address: say so plainly and offer the way forward.
+          A generic "code on its way" left new customers waiting for an email that
+          was never sent. */}
+      {signupPrompt && (
+        <div
+          className="fixed inset-0 z-[70] flex items-end justify-center overflow-hidden bg-black/80 p-0 sm:items-center sm:p-6"
+          onClick={() => setSignupPrompt(null)}
+        >
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="no-account-title"
+            onClick={(event) => event.stopPropagation()}
+            className="bb-card w-full max-w-md !bg-bbCoal p-6 outline-none sm:p-8"
+          >
+            <p className="bb-eyebrow">No Account Yet</p>
+            <h2 id="no-account-title" className="mt-3 font-display text-2xl text-bbInk">
+              This email is not registered.
+            </h2>
+            <p className="mt-3 text-sm leading-relaxed text-bbInk/65">
+              We could not send a code because{' '}
+              <strong className="text-bbInk">{signupPrompt}</strong> has no BOSS BADDIE
+              account yet.
+            </p>
+
+            <div className="mt-6 flex flex-col gap-3 sm:flex-row">
+              <Link
+                href={`/account/register?email=${encodeURIComponent(signupPrompt)}&next=${encodeURIComponent(
+                  safeNext(next),
+                )}`}
+                className="bb-btn-solid w-full text-center"
+              >
+                Create An Account
+              </Link>
+              <button
+                type="button"
+                onClick={() => setSignupPrompt(null)}
+                className="bb-btn-outline w-full"
+              >
+                Try Another Email
+              </button>
+            </div>
+          </div>
         </div>
       )}
-
-      <button type="submit" disabled={submitting} className="bb-btn-solid w-full disabled:opacity-50">
-        {submitting ? 'Sending code…' : 'Send My Code'}
-      </button>
-
-      <p className="pt-2 text-center text-sm text-bbInk/55">
-        New here?{' '}
-        <Link
-          href={`/account/register?next=${encodeURIComponent(safeNext(next))}`}
-          className="text-bbRose underline-offset-4 hover:underline"
-        >
-          Create an account
-        </Link>
-      </p>
-    </form>
+    </>
   );
 }

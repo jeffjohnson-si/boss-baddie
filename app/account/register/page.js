@@ -33,6 +33,11 @@ export default async function RegisterPage({ searchParams }) {
   const params = await searchParams;
   const next = safeNext(params?.next);
 
+  // Sign-in sends people here when their address has no account yet, carrying the
+  // address they typed so they do not have to enter it twice.
+  const defaultEmail =
+    typeof params?.email === 'string' ? params.email.trim().slice(0, 120) : '';
+
   const customer = await currentCustomer();
   if (customer) redirect(next);
 
@@ -55,7 +60,7 @@ export default async function RegisterPage({ searchParams }) {
             device.
           </p>
 
-          <RegisterForm next={next} />
+          <RegisterForm next={next} defaultEmail={defaultEmail} />
 
           {/* DEVELOPMENT ONLY — see the same block on the sign-in page. */}
           {process.env.DEV_LOGIN_ENABLED === '1' && (

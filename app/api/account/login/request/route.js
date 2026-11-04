@@ -15,11 +15,17 @@ import { clientKey, hit } from '@/lib/rate-limit';
  *
  * Body: { email }
  *
- * If the address has an account, a six-digit code is emailed. The response is
- * identical whether or not the account exists, so this endpoint cannot be used
- * to enumerate Patricia's customers — including when the per-address limit is
- * reached, which is why that limit is counted in memory for every address rather
- * than only for real accounts.
+ * If the address has an account, a six-digit code is emailed. If it does not, the
+ * request is refused outright with `needsAccount`, and the page offers sign-up.
+ *
+ * THAT IS A DELIBERATE TRADE. The usual choice is to answer identically for every
+ * address so the endpoint cannot be used to discover who shops here. This one
+ * answers honestly instead: a new customer who types her address into the sign-in
+ * form was being told "a code is on its way" and then waiting forever for an email
+ * that was never sent. Clarity was chosen over concealment.
+ *
+ * What still holds: the per-address limit counts every address, real or not, and
+ * a code is only ever generated for an account that exists.
  */
 
 const IP_LIMIT = 10;
@@ -80,6 +86,20 @@ export async function POST(request) {
     );
   }
 
+  // No account: say so, and let the page offer sign-up. Nothing is generated and
+  // nothing is sent.
+  if (!(await emailTaken(email))) {
+    return NextResponse.json(
+      {
+        ok: false,
+        needsAccount: true,
+        email,
+        errors: ['That email is not registered yet. Create an account to get started.'],
+      },
+      { status: 404 },
+    );
+  }
+
   const payload = {
     ok: true,
     pending: true,
@@ -88,11 +108,8 @@ export async function POST(request) {
     resendAfter: VERIFICATION_RULES.RESEND_COOLDOWN_SECONDS,
   };
 
-  // No account: answer exactly the same way, but send nothing.
-  if (!(await emailTaken(email))) return NextResponse.json(payload);
-
   // A second request inside the cooldown answers the same and sends nothing, so
-  // pressing "send again" twice does not read as a different kind of address.
+  // pressing "send again" twice does not fire two emails.
   if ((await resendLoginCooldownSeconds(email)) > 0) return NextResponse.json(payload);
 
   const code = await startLoginVerification(email);
