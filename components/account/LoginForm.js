@@ -302,7 +302,10 @@ export default function LoginForm({ next = '/account' }) {
           was never sent. */}
       {signupPrompt && (
         <div
-          className="fixed inset-0 z-[70] flex items-end justify-center overflow-hidden bg-black/80 p-0 sm:items-center sm:p-6"
+          // Centred on every screen size, not a bottom sheet: on a phone the
+          // bottom of the viewport is where the tab bar lives, which cropped the
+          // buttons and pushed the pop-up below the fold.
+          className="fixed inset-0 z-[70] flex items-center justify-center overflow-y-auto bg-black/80 p-4 sm:p-6"
           onClick={() => setSignupPrompt(null)}
         >
           <div
@@ -310,7 +313,7 @@ export default function LoginForm({ next = '/account' }) {
             aria-modal="true"
             aria-labelledby="no-account-title"
             onClick={(event) => event.stopPropagation()}
-            className="bb-card w-full max-w-md !bg-bbCoal p-6 outline-none sm:p-8"
+            className="bb-card max-h-[calc(100vh-2rem)] w-full max-w-md overflow-y-auto !bg-bbCoal p-6 outline-none sm:p-8"
           >
             <p className="bb-eyebrow">No Account Yet</p>
             <h2 id="no-account-title" className="mt-3 font-display text-2xl text-bbInk">
