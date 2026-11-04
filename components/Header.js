@@ -80,16 +80,18 @@ export default function Header({ signedIn = false }) {
         {/* ---- Right side ---- */}
         <div className="flex shrink-0 items-center gap-3 lg:gap-4">
           {/* Her account, beside the bag: both are "your things". The label is the
-              honest one for what tapping it does — signed out there is no orders
+              honest one for what tapping it does — signed out there is no account
               page to show, so it says Sign In rather than pretending otherwise.
-              Kept out of NAV_LINKS so six destination links do not crowd the
-              centred desktop row; the mobile panel carries it below. */}
+              Signed in it says Account and opens /account, the same destination as
+              the Account tab in the mobile bar; invoices and profile both live
+              under it. Kept out of NAV_LINKS so six destination links do not crowd
+              the centred desktop row. */}
           <Link
-            href={signedIn ? '/shop/invoices' : '/account/login'}
-            aria-current={isActive('/shop/invoices') ? 'page' : undefined}
+            href={signedIn ? '/account' : '/account/login'}
+            aria-current={pathname === '/account' ? 'page' : undefined}
             className="hidden min-h-[44px] items-center text-[11px] font-semibold uppercase tracking-[0.22em] text-bbInk/70 transition-colors hover:text-bbRose sm:flex"
           >
-            {signedIn ? 'My Invoices' : 'Sign In'}
+            {signedIn ? 'Account' : 'Sign In'}
           </Link>
 
           <CartLink count={count} />
@@ -140,16 +142,15 @@ export default function Header({ signedIn = false }) {
             </Link>
           ))}
 
-          {/* The same destination as the desktop link, in the panel because the
-              right-hand link is hidden on the smallest screens. Grouped with the
-              destinations rather than the calls to action: it is where she looks
-              for her own order. */}
+          {/* The same destination as the desktop link and the Account tab in the
+              mobile bar, so all three agree. Grouped with the destinations rather
+              than the calls to action: it is where she looks for her own orders. */}
           <Link
-            href={signedIn ? '/shop/invoices' : '/account/login'}
+            href={signedIn ? '/account' : '/account/login'}
             className={`flex min-h-[58px] items-center justify-between border-b border-bbLine text-sm font-semibold uppercase tracking-[0.2em]
-              ${isActive('/shop/invoices') ? 'text-bbRose' : 'text-bbInk'}`}
+              ${pathname === '/account' ? 'text-bbRose' : 'text-bbInk'}`}
           >
-            {signedIn ? 'My Invoices' : 'Sign In'}
+            {signedIn ? 'Account' : 'Sign In'}
             <span aria-hidden="true" className="text-bbRose">&rarr;</span>
           </Link>
 
