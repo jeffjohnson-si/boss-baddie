@@ -20,9 +20,15 @@ import { clientKey, hit, reset } from '@/lib/rate-limit';
  *   POST   /api/admin/session   log in  — sets the signed session cookie
  *   DELETE /api/admin/session   log out — clears it
  *
- * Once admin_users has a row, the database account is the only way in. The
- * ADMIN_EMAIL / ADMIN_PASSWORD pair is a bootstrap for the very first sign-in and
- * stops working the moment Patricia registers.
+ * Once admin_users has a row, the database account is the only way in.
+ *
+ * THE ENVIRONMENT LOGIN IS LOCAL ONLY. ADMIN_EMAIL / ADMIN_PASSWORD are honoured
+ * only when DEV_LOGIN_ENABLED=1, which must never be set on a deployed server.
+ * Before this, a deployed site with no admin account would accept those values as
+ * a real login — so a password that leaked into a chat, a screenshot or a backup
+ * became admin access to every order. The first real account is created at
+ * /admin/register, which needs no credentials at all, so production never needs
+ * this path.
  *
  * RATE LIMITED: ten wrong answers from one address in fifteen minutes.
  */
@@ -59,8 +65,8 @@ export async function POST(request) {
     if (admins > 0) {
       const found = await getAdminByEmail(normaliseEmail(email));
       if (found && verifyAdminPassword(found, password)) admin = found;
-    } else if (verifyCredentials(email, password)) {
-      // First-run bootstrap. There is no database account to attach a name to.
+    } else if (process.env.DEV_LOGIN_ENABLED === '1' && verifyCredentials(email, password)) {
+      // Local preview only. There is no database account to attach a name to.
       admin = {
         id: 'env',
         email: normaliseEmail(email),

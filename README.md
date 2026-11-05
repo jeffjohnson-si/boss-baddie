@@ -438,8 +438,10 @@ admin.
   in 30 minutes, and the password change invalidates every older session.
 - `/admin/account` — display name, password change, and up to three recovery
   emails. A recovery address only receives reset links after it is verified.
-- `ADMIN_EMAIL` / `ADMIN_PASSWORD` are a bootstrap only: they work while no
-  database admin exists and stop the moment the owner registers.
+- `ADMIN_EMAIL` / `ADMIN_PASSWORD` are a **local preview login only**: they are
+  accepted only when `DEV_LOGIN_ENABLED=1`, and they stop working the moment the
+  owner registers. A deployed server never sets that flag, so these values cannot
+  sign anyone in — a leaked password is not an admin credential.
 
 Email goes through Brevo (`EMAIL_PROVIDER=brevo`) or the server log in development
 (`EMAIL_PROVIDER=console`).
@@ -742,8 +744,10 @@ Never leave `EMAIL_PROVIDER=console` on the deployed site: reset links would be
 written to the server log instead of delivered.
 
 After the first deploy, open `/admin/register` once to create Patricia's owner
-account. From that moment `ADMIN_EMAIL` / `ADMIN_PASSWORD` are ignored; remove them
-from the Netlify environment.
+account. That page needs no credentials — it is open only while `admin_users` is
+empty. Never put `ADMIN_EMAIL` / `ADMIN_PASSWORD` in the Netlify environment: they
+are a local preview login and are refused on any server without
+`DEV_LOGIN_ENABLED=1`.
 
 ### Vercel and other serverless hosts
 
@@ -891,8 +895,9 @@ Already in place:
   `order_items_line_total_matches` checks, so an interrupted request cannot leave
   a half-written order or a line whose arithmetic disagrees with its total.
 - Admin passwords are hashed with scrypt and a random 16-byte salt. The
-  `ADMIN_EMAIL` / `ADMIN_PASSWORD` pair is accepted only while no database admin
-  exists; after registration it is ignored.
+  `ADMIN_EMAIL` / `ADMIN_PASSWORD` pair is honoured only when
+  `DEV_LOGIN_ENABLED=1`, so it is a local preview login rather than a deployed
+  credential.
 - Reset and recovery-verification tokens are stored only as SHA-256 hashes,
   single-use, and expire (30 minutes for resets, 24 hours for recovery).
 - The admin session carries the account id and a `session_version`. A password
